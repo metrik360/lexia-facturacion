@@ -1319,7 +1319,7 @@
     <!-- Header -->
     <header class="header">
         <div class="header-left">
-            <img id="headerLogo" src="/lexia/assets/logo-lexia.png" alt="Lexia" class="logo">
+            <img id="headerLogo" src="/assets/logo-lexia.png" alt="Lexia" class="logo">
             <span class="header-title">Dashboard de Cartera</span>
         </div>
         <button class="btn-refresh" id="btnRefresh" onclick="cargarDatos()">
@@ -1354,11 +1354,10 @@
         // CONFIGURACIÓN
         // ============================================
         const isLocalServer = window.location.hostname === 'localhost' && window.location.port === '3001';
-        const isVercel = window.location.hostname.includes('vercel.app') || window.location.hostname.includes('metrik.com.co') || (!isLocalServer && window.location.protocol === 'https:');
+        const isVercel = !isLocalServer && window.location.protocol === 'https:';
 
-        // Base path para producción (subpath /lexia)
-        const BASE_PATH = isLocalServer ? '' : '/lexia';
-        const ASSETS_PATH = `${BASE_PATH}/assets`;
+        // Rutas de assets
+        const ASSETS_PATH = '/assets';
         const LOGO_URL = `${ASSETS_PATH}/logo-lexia.png`;
 
         const CONFIG = {
@@ -1470,7 +1469,7 @@
                 accessToken = data.access_token;
             } else if (isVercel) {
                 // Vercel serverless function
-                const response = await fetch(`${BASE_PATH}/api/siigo?endpoint=auth&username=${encodeURIComponent(CONFIG.USERNAME)}&access_key=${encodeURIComponent(CONFIG.ACCESS_KEY)}`);
+                const response = await fetch(`/api/siigo?endpoint=auth&username=${encodeURIComponent(CONFIG.USERNAME)}&access_key=${encodeURIComponent(CONFIG.ACCESS_KEY)}`);
                 if (!response.ok) throw new Error('Error de autenticación');
                 const data = await response.json();
                 accessToken = data.access_token;
@@ -1508,7 +1507,7 @@
                     url = `/api/${cleanEndpoint}?page=${page}&page_size=${pageSize}`;
                 } else if (isVercel) {
                     // Vercel serverless function
-                    url = `${BASE_PATH}/api/siigo?endpoint=${encodeURIComponent(cleanEndpoint + `?page=${page}&page_size=${pageSize}`)}`;
+                    url = `/api/siigo?endpoint=${encodeURIComponent(cleanEndpoint + `?page=${page}&page_size=${pageSize}`)}`;
                     headers['Authorization'] = `Bearer ${accessToken}`;
                 } else {
                     // Directo a Siigo

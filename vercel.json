@@ -1,27 +1,9 @@
 {
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/lexia/api/:path*",
-      "destination": "/api/:path*"
-    },
-    {
-      "source": "/lexia/assets/:path*",
-      "destination": "/assets/:path*"
-    },
-    {
-      "source": "/lexia",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/lexia/:path*",
-      "destination": "/index.html"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/lexia",
-      "permanent": false
+      "src": "api/*.js",
+      "use": "@vercel/node"
     }
   ]
 }
