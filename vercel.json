@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/lexia/api/siigo",
-      "destination": "/api/siigo"
+      "source": "/lexia/api/:path*",
+      "destination": "/api/:path*"
     },
     {
       "source": "/lexia/assets/:path*",
