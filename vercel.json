@@ -1,40 +1,27 @@
 {
-  "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
+      "source": "/lexia/api/siigo",
+      "destination": "/api/siigo"
     },
     {
-      "src": "index.html",
-      "use": "@vercel/static"
+      "source": "/lexia/assets/:path*",
+      "destination": "/assets/:path*"
     },
     {
-      "src": "assets/**",
-      "use": "@vercel/static"
+      "source": "/lexia",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/lexia/:path*",
+      "destination": "/index.html"
     }
   ],
-  "routes": [
+  "redirects": [
     {
-      "src": "^/$",
-      "status": 302,
-      "headers": { "Location": "/lexia" }
-    },
-    {
-      "src": "^/lexia/api/siigo$",
-      "dest": "/api/siigo.js"
-    },
-    {
-      "src": "^/lexia/assets/(.*)$",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "^/lexia/?$",
-      "dest": "/index.html"
-    },
-    {
-      "src": "^/lexia/(.*)$",
-      "dest": "/index.html"
+      "source": "/",
+      "destination": "/lexia",
+      "permanent": false
     }
   ]
 }
