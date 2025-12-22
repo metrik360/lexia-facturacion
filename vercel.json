@@ -16,25 +16,25 @@
   ],
   "routes": [
     {
-      "src": "/lexia/api/(.*)",
-      "dest": "/api/siigo.js"
-    },
-    {
-      "src": "/lexia/assets/(.*)",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/lexia/?$",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/lexia/(.*)",
-      "dest": "/index.html"
-    },
-    {
       "src": "^/$",
       "status": 302,
       "headers": { "Location": "/lexia" }
+    },
+    {
+      "src": "^/lexia/api/siigo$",
+      "dest": "/api/siigo.js"
+    },
+    {
+      "src": "^/lexia/assets/(.*)$",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "^/lexia/?$",
+      "dest": "/index.html"
+    },
+    {
+      "src": "^/lexia/(.*)$",
+      "dest": "/index.html"
     }
   ]
 }

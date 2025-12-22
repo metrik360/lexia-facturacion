@@ -1319,7 +1319,7 @@
     <!-- Header -->
     <header class="header">
         <div class="header-left">
-            <img src="assets/logo-lexia.png" alt="Lexia" class="logo">
+            <img id="headerLogo" src="/lexia/assets/logo-lexia.png" alt="Lexia" class="logo">
             <span class="header-title">Dashboard de Cartera</span>
         </div>
         <button class="btn-refresh" id="btnRefresh" onclick="cargarDatos()">
@@ -1358,6 +1358,8 @@
 
         // Base path para producción (subpath /lexia)
         const BASE_PATH = isLocalServer ? '' : '/lexia';
+        const ASSETS_PATH = `${BASE_PATH}/assets`;
+        const LOGO_URL = `${ASSETS_PATH}/logo-lexia.png`;
 
         const CONFIG = {
             USERNAME: 'facturacion@lexia.co',
@@ -3941,6 +3943,10 @@
         // MAIN
         // ============================================
         async function cargarDatos() {
+            // Ajustar logo dinámicamente según el entorno
+            const headerLogo = document.getElementById('headerLogo');
+            if (headerLogo) headerLogo.src = LOGO_URL;
+
             const btnRefresh = document.getElementById('btnRefresh');
             btnRefresh.disabled = true;
 
@@ -4170,7 +4176,7 @@
                 pdfContent.innerHTML = `
                     <!-- Header -->
                     <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 3px solid #418D93; margin-bottom: 20px;">
-                        <img src="assets/logo-lexia.png" style="height: 50px;" crossorigin="anonymous">
+                        <img src="${LOGO_URL}" style="height: 50px;" crossorigin="anonymous">
                         <div style="text-align: right;">
                             <h1 style="font-size: 22px; font-weight: 700; color: #003839; margin: 0;">Análisis de Ventas ${anioAnalisis}</h1>
                             <p style="font-size: 11px; color: #757575; margin: 4px 0 0 0;">Generado: ${fechaGeneracion}</p>
@@ -4261,7 +4267,7 @@
 
                     <!-- Header Página 2 - Logo más pequeño -->
                     <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 2px solid #418D93; margin-bottom: 15px;">
-                        <img src="assets/logo-lexia.png" style="height: 28px;" crossorigin="anonymous">
+                        <img src="${LOGO_URL}" style="height: 28px;" crossorigin="anonymous">
                         <div style="text-align: right;">
                             <span style="font-size: 12px; font-weight: 600; color: #003839;">Detalle del Período: ${periodoLabel}</span>
                         </div>
