@@ -1,9 +1,9 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/*.js",
-      "use": "@vercel/node"
-    }
+  "routes": [
+    { "src": "/lexia/api/(.*)", "dest": "/api/$1" },
+    { "src": "/lexia/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/lexia/?$", "dest": "/index.html" },
+    { "src": "/lexia/(.*)", "dest": "/$1" }
   ]
 }

@@ -637,6 +637,16 @@
             background: #fef2f2;
         }
 
+        .row-clickable:hover {
+            background: #f0f9ff !important;
+            transition: background-color 0.15s ease;
+        }
+
+        .row-selected {
+            background: #dbeafe !important;
+            border-left: 4px solid var(--azul) !important;
+        }
+
         .status-badge {
             display: inline-flex;
             align-items: center;
@@ -1063,6 +1073,51 @@
             overflow-y: auto;
         }
 
+        /* Botón "más" para conceptos largos */
+        .btn-ver-mas {
+            background: none;
+            border: none;
+            color: var(--teal-principal);
+            font-size: 11px;
+            cursor: pointer;
+            padding: 0 4px;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+        .btn-ver-mas:hover {
+            color: var(--teal-oscuro);
+        }
+        .concepto-truncado {
+            display: inline;
+        }
+        .concepto-expandido {
+            display: inline;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        /* Filas expandibles en detalle */
+        .tabla-detalle-cliente .doc-row.expandible:hover td {
+            background: #f0f9ff;
+        }
+        .tabla-detalle-cliente .expand-icon {
+            display: inline-block;
+            width: 16px;
+            font-size: 10px;
+            color: var(--gris-medio);
+            margin-right: 4px;
+        }
+        .detalle-subrow-container td {
+            padding: 0 !important;
+        }
+        .tabla-detalle-cliente .pago-subrow td {
+            padding: 6px 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .tabla-detalle-cliente .pago-subrow:last-child td {
+            border-bottom: none;
+        }
+
         /* Gráfica de Conciliación */
         .conciliacion-chart {
             display: flex;
@@ -1312,6 +1367,340 @@
         .powered-by-footer .metrik-logo:hover {
             opacity: 1;
         }
+
+        /* Estilos para Cuentas por Cobrar */
+        .cxc-container {
+            background: var(--blanco);
+            border-radius: 8px;
+            border: 1px solid var(--gris-claro);
+            overflow: hidden;
+        }
+
+        .cxc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: var(--verde-oscuro);
+            color: var(--blanco);
+        }
+
+        .cxc-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .cxc-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .cxc-table-wrapper {
+            overflow-x: auto;
+        }
+
+        .cxc-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .cxc-table th {
+            background: var(--gris-claro);
+            padding: 12px 10px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--negro);
+            border-bottom: 2px solid var(--gris-medio);
+            white-space: nowrap;
+        }
+
+        .cxc-table th:first-child,
+        .cxc-table th:nth-child(2) {
+            text-align: left;
+        }
+
+        .cxc-table td {
+            padding: 10px;
+            border-bottom: 1px solid var(--gris-claro);
+            text-align: right;
+        }
+
+        .cxc-table td:first-child,
+        .cxc-table td:nth-child(2) {
+            text-align: left;
+        }
+
+        .cxc-table td:first-child {
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--gris-medio);
+        }
+
+        .cxc-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .cxc-table .total-row {
+            background: var(--verde-oscuro) !important;
+            color: var(--blanco);
+            font-weight: 700;
+        }
+
+        .cxc-table .total-row td {
+            padding: 14px 10px;
+            border-bottom: none;
+        }
+
+        .cxc-table .total-row:hover {
+            background: var(--verde-oscuro) !important;
+        }
+
+        .cxc-negative {
+            color: var(--verde);
+        }
+
+        .cxc-positive {
+            color: var(--negro);
+        }
+
+        .cxc-warning {
+            color: var(--naranja);
+        }
+
+        .cxc-danger {
+            color: var(--rojo);
+        }
+
+        .cxc-saldo-favor {
+            color: var(--teal-principal);
+            font-weight: 500;
+        }
+
+        .cxc-total-cartera-positive {
+            font-weight: 600;
+        }
+
+        .cxc-total-cartera-negative {
+            color: var(--teal-principal);
+            font-weight: 600;
+        }
+
+        .cxc-info {
+            padding: 16px 20px;
+            background: #f0f9ff;
+            border-top: 1px solid var(--gris-claro);
+            font-size: 12px;
+            color: var(--gris-medio);
+        }
+
+        .cxc-summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .cxc-summary-card {
+            background: var(--blanco);
+            border: 1px solid var(--gris-claro);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .cxc-summary-card-label {
+            font-size: 12px;
+            color: var(--gris-medio);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .cxc-summary-card-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--verde-oscuro);
+            margin-top: 4px;
+        }
+
+        .cxc-summary-card-value.negative {
+            color: var(--teal-principal);
+        }
+
+        /* Estilos para filas clickeables */
+        .cxc-table tbody tr:not(.total-row) {
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .cxc-table tbody tr:not(.total-row):hover {
+            background: #e8f4f5 !important;
+        }
+
+        .cxc-table tbody tr.selected {
+            background: #d0ebee !important;
+            border-left: 3px solid var(--teal-principal);
+        }
+
+        /* Detalle de documentos del cliente */
+        .cxc-detalle-container {
+            margin-top: 24px;
+            background: var(--blanco);
+            border-radius: 8px;
+            border: 1px solid var(--gris-claro);
+            overflow: hidden;
+        }
+
+        .cxc-detalle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: var(--teal-principal);
+            color: var(--blanco);
+        }
+
+        .cxc-detalle-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .cxc-detalle-cliente {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-top: 2px;
+        }
+
+        .cxc-detalle-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .cxc-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .cxc-checkbox-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .cxc-detalle-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .cxc-detalle-table th {
+            background: #f8f9fa;
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--negro);
+            border-bottom: 2px solid var(--gris-claro);
+            position: sticky;
+            top: 0;
+        }
+
+        .cxc-detalle-table th.text-right,
+        .cxc-detalle-table td.text-right {
+            text-align: right;
+        }
+
+        .cxc-detalle-table td {
+            padding: 8px;
+            border-bottom: 1px solid var(--gris-claro);
+        }
+
+        .cxc-detalle-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .cxc-detalle-table .doc-factura {
+            color: var(--negro);
+        }
+
+        .cxc-detalle-table .doc-nc {
+            color: var(--teal-principal);
+            font-style: italic;
+        }
+
+        .cxc-detalle-table .saldo-pendiente {
+            color: var(--rojo);
+            font-weight: 600;
+        }
+
+        .cxc-detalle-table .saldo-cero {
+            color: var(--gris-medio);
+        }
+
+        .cxc-detalle-table .saldo-favor {
+            color: var(--teal-principal);
+            font-weight: 600;
+        }
+
+        .cxc-detalle-scroll {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .cxc-detalle-empty {
+            padding: 40px;
+            text-align: center;
+            color: var(--gris-medio);
+        }
+
+        .cxc-detalle-summary {
+            display: flex;
+            gap: 24px;
+            padding: 12px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid var(--gris-claro);
+            font-size: 13px;
+        }
+
+        .cxc-detalle-summary-item {
+            display: flex;
+            gap: 8px;
+        }
+
+        .cxc-detalle-summary-label {
+            color: var(--gris-medio);
+        }
+
+        .cxc-detalle-summary-value {
+            font-weight: 600;
+            color: var(--negro);
+        }
+
+        /* Filas expandibles */
+        .doc-row.expandible:hover {
+            background: #e8f4f5 !important;
+        }
+
+        .expand-icon {
+            display: inline-block;
+            width: 16px;
+            margin-right: 4px;
+            font-size: 10px;
+            color: var(--gris-medio);
+            transition: transform 0.2s;
+        }
+
+        .pago-subrow td {
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .pagos-container {
+            background: #f8f9fa;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
@@ -1356,8 +1745,11 @@
         const isLocalServer = window.location.hostname === 'localhost' && window.location.port === '3001';
         const isVercel = !isLocalServer && window.location.protocol === 'https:';
 
+        // Detectar base path (para /lexia/ o raíz)
+        const BASE_PATH = window.location.pathname.includes('/lexia') ? '/lexia' : '';
+
         // Rutas de assets
-        const ASSETS_PATH = '/assets';
+        const ASSETS_PATH = `${BASE_PATH}/assets`;
         const LOGO_URL = `${ASSETS_PATH}/logo-lexia.png`;
 
         const CONFIG = {
@@ -1394,18 +1786,22 @@
         let accessToken = null;
         let facturas = [];
         let notasCredito = [];  // Notas crédito para restar de ventas
+        let vouchers = [];      // Recibos de caja (pagos)
+        let pagosPorFactura = {}; // Índice de pagos agrupados por factura
         let facturasProcessed = [];
         let clientes = {};
         let clientesMap = {};
         let tabActiva = 'graficos'; // 'graficos', 'tablas' o 'conciliacion'
         let anioAnalisis = new Date().getFullYear(); // Año para la pestaña Análisis por Año
+        let horizonteCritico = 90; // Horizonte para tarjeta de cartera crítica: 60, 90 o 120 días
 
         // Estado de filtros
         let filtros = {
             cliente: '',
             lineaNegocio: '',
             cierreAnio: '',
-            cierreMes: ''
+            cierreMes: '',
+            clienteConciliacion: ''  // Cliente seleccionado en la vista de Análisis por Año
         };
 
         // Nombres de meses
@@ -1469,7 +1865,7 @@
                 accessToken = data.access_token;
             } else if (isVercel) {
                 // Vercel serverless function
-                const response = await fetch(`/api/siigo?endpoint=auth&username=${encodeURIComponent(CONFIG.USERNAME)}&access_key=${encodeURIComponent(CONFIG.ACCESS_KEY)}`);
+                const response = await fetch(`${BASE_PATH}/api/siigo?endpoint=auth&username=${encodeURIComponent(CONFIG.USERNAME)}&access_key=${encodeURIComponent(CONFIG.ACCESS_KEY)}`);
                 if (!response.ok) throw new Error('Error de autenticación');
                 const data = await response.json();
                 accessToken = data.access_token;
@@ -1504,10 +1900,10 @@
 
                 if (isLocalServer) {
                     // Servidor local Node.js
-                    url = `/api/${cleanEndpoint}?page=${page}&page_size=${pageSize}`;
+                    url = `${BASE_PATH}/api/${cleanEndpoint}?page=${page}&page_size=${pageSize}`;
                 } else if (isVercel) {
-                    // Vercel serverless function
-                    url = `/api/siigo?endpoint=${encodeURIComponent(cleanEndpoint + `?page=${page}&page_size=${pageSize}`)}`;
+                    // Vercel serverless function - pasar paginación como parámetros separados
+                    url = `${BASE_PATH}/api/siigo?endpoint=${encodeURIComponent(cleanEndpoint)}&page=${page}&page_size=${pageSize}`;
                     headers['Authorization'] = `Bearer ${accessToken}`;
                 } else {
                     // Directo a Siigo
@@ -1534,12 +1930,55 @@
                     const percent = 20 + Math.min(15, (allResults.length / total) * 15);
                     updateProgress(percent, `Cargando clientes: ${allResults.length}/${total}`);
                 } else if (endpoint.includes('credit-notes')) {
-                    const percent = 75 + Math.min(15, (allResults.length / total) * 15);
+                    const percent = 70 + Math.min(10, (allResults.length / total) * 10);
                     updateProgress(percent, `Cargando notas crédito: ${allResults.length}/${total}`);
+                } else if (endpoint.includes('vouchers')) {
+                    const percent = 80 + Math.min(10, (allResults.length / total) * 10);
+                    updateProgress(percent, `Cargando recibos de caja: ${allResults.length}/${total}`);
                 }
             }
 
             return allResults;
+        }
+
+        // Construir índice de pagos agrupados por factura
+        function construirIndicePagos(vouchersData) {
+            const indice = {};
+
+            vouchersData.forEach(v => {
+                const voucherInfo = {
+                    id: v.id,
+                    numero: v.name,
+                    fecha: v.date,
+                    clienteNit: v.customer?.identification || 'N/A'
+                };
+
+                (v.items || []).forEach(item => {
+                    const due = item.due;
+                    if (due && due.prefix && due.consecutive) {
+                        // Construir llave de factura (ej: "FV-2-2135")
+                        const facturaKey = `${due.prefix}-${due.consecutive}`;
+
+                        if (!indice[facturaKey]) {
+                            indice[facturaKey] = [];
+                        }
+
+                        indice[facturaKey].push({
+                            voucherId: v.id,
+                            voucherNumero: v.name,
+                            voucherFecha: v.date,
+                            cuenta: item.account?.code || '',
+                            movimiento: item.account?.movement || '',
+                            valor: item.value || 0,
+                            descripcion: item.description || '',
+                            cuota: due.quote || 1,
+                            fechaVencimiento: due.date
+                        });
+                    }
+                });
+            });
+
+            return indice;
         }
 
         // ============================================
@@ -1960,6 +2399,9 @@
             }
         }
 
+        // Variable para el filtro de búsqueda en detalle
+        let filtroDetalleCliente = '';
+
         // Renderizar tabla de detalle de facturas y NC por cliente
         function renderDetalleCliente(nit, nombreCliente) {
             // Obtener facturas del cliente
@@ -1968,170 +2410,296 @@
                 return nitFactura === nit;
             });
 
-            // Obtener notas crédito del cliente
-            const ncCliente = notasCredito.filter(nc => {
-                const nitNC = nc.customer?.identification || '';
-                return nitNC === nit;
-            });
-
-            if (facturasCliente.length === 0 && ncCliente.length === 0) {
+            if (facturasCliente.length === 0) {
                 return `<div style="text-align: center; padding: 40px; color: var(--gris-medio);">
-                    No hay facturas ni notas crédito para este cliente
+                    No hay facturas para este cliente
                 </div>`;
             }
 
-            // Agrupar por año
+            // Construir índice de notas crédito por factura vinculada
+            const ncPorFactura = {};
+            notasCredito.forEach(nc => {
+                if (nc.customer?.identification === nit && nc.invoice?.name) {
+                    const facturaKey = nc.invoice.name;
+                    if (!ncPorFactura[facturaKey]) {
+                        ncPorFactura[facturaKey] = [];
+                    }
+                    // Obtener concepto de la NC
+                    const conceptoNC = (nc.items || []).map(i => i.description || i.code).filter(Boolean).join(', ');
+                    ncPorFactura[facturaKey].push({
+                        numero: nc.name,
+                        fecha: nc.date,
+                        total: nc.total || 0,
+                        concepto: conceptoNC
+                    });
+                }
+            });
+
+            // Agrupar facturas por año con toda la información
             const documentosPorAnio = {};
 
             facturasCliente.forEach(f => {
                 if (!f.date) return;
                 const anio = parseInt(f.date.substring(0, 4));
                 if (!documentosPorAnio[anio]) {
-                    documentosPorAnio[anio] = { facturas: [], nc: [] };
+                    documentosPorAnio[anio] = [];
                 }
+
+                const facturaName = f.name || `${f.prefix}-${f.number}`;
+
                 // Calcular valor base
                 let valorBase = 0;
+                const conceptoCompleto = (f.items || []).map(i => i.description || i.code).filter(Boolean).join(' | ');
                 (f.items || []).forEach(item => {
                     valorBase += (item.price || 0) * (item.quantity || 1);
                 });
-                documentosPorAnio[anio].facturas.push({
-                    numero: f.name || f.id,
-                    fecha: f.date,
-                    concepto: (f.items || []).map(i => i.description || i.code).join(', ').substring(0, 80),
-                    valorBase: valorBase,
-                    iva: f.total - valorBase,
-                    total: f.total || 0,
-                    saldo: f.balance || 0
-                });
-            });
 
-            ncCliente.forEach(nc => {
-                if (!nc.date) return;
-                const anio = parseInt(nc.date.substring(0, 4));
-                if (!documentosPorAnio[anio]) {
-                    documentosPorAnio[anio] = { facturas: [], nc: [] };
+                // Buscar pagos (RC) asociados
+                const llavesPosibles = [facturaName, `FV-2-${f.number}`, `FV-1-${f.number}`, `${f.prefix}-${f.number}`];
+                let pagosFactura = [];
+                for (const llave of llavesPosibles) {
+                    if (pagosPorFactura[llave]) {
+                        pagosFactura = pagosPorFactura[llave];
+                        break;
+                    }
                 }
-                // Calcular valor base
-                let valorBase = 0;
-                (nc.items || []).forEach(item => {
-                    valorBase += (item.price || 0) * (item.quantity || 1);
-                });
-                documentosPorAnio[anio].nc.push({
-                    numero: nc.name || nc.id,
-                    fecha: nc.date,
-                    concepto: (nc.items || []).map(i => i.description || i.code).join(', ').substring(0, 80),
+
+                // Buscar notas crédito asociadas
+                let notasCreditoFactura = [];
+                for (const llave of llavesPosibles) {
+                    if (ncPorFactura[llave]) {
+                        notasCreditoFactura = ncPorFactura[llave];
+                        break;
+                    }
+                }
+
+                // Calcular totales
+                const totalPagadoRC = pagosFactura
+                    .filter(p => p.movimiento === 'Credit')
+                    .reduce((sum, p) => sum + p.valor, 0);
+                const totalNC = notasCreditoFactura.reduce((sum, nc) => sum + nc.total, 0);
+                const saldoReportado = f.balance || 0;
+
+                // Determinar estado
+                let estado = 'pendiente';
+                if (totalNC >= (f.total || 0) * 0.99) {
+                    estado = 'anulada';
+                } else if (saldoReportado === 0 && totalPagadoRC > 0) {
+                    estado = 'pagada';
+                } else if (saldoReportado === 0) {
+                    estado = 'saldada';
+                } else if (totalNC > 0) {
+                    estado = 'nc_parcial';
+                }
+
+                documentosPorAnio[anio].push({
+                    numero: facturaName,
+                    fecha: f.date,
+                    concepto: conceptoCompleto,
                     valorBase: valorBase,
-                    iva: (nc.total || 0) - valorBase,
-                    total: nc.total || 0
+                    iva: (f.total || 0) - valorBase,
+                    total: f.total || 0,
+                    saldo: saldoReportado,
+                    estado: estado,
+                    notasCredito: notasCreditoFactura,
+                    pagos: pagosFactura.filter(p => p.movimiento === 'Credit'),
+                    totalNC: totalNC,
+                    totalPagadoRC: totalPagadoRC
                 });
             });
 
             // Ordenar años descendente
             const aniosOrdenados = Object.keys(documentosPorAnio).sort((a, b) => b - a);
 
-            let html = '<div class="table-scroll-container" style="max-height: 500px;">';
+            // Filtrar documentos si hay búsqueda activa
+            const filtro = filtroDetalleCliente.toLowerCase().trim();
+
+            let html = `
+                <div class="detalle-search-container" style="margin-bottom: 16px;">
+                    <input type="text"
+                           id="searchDetalleCliente"
+                           placeholder="Buscar por número de factura o concepto..."
+                           value="${filtroDetalleCliente}"
+                           oninput="filtrarDetalleCliente(this.value)"
+                           style="width: 100%; padding: 10px 14px; border: 1px solid var(--gris-claro); border-radius: 6px; font-size: 14px;">
+                </div>
+            `;
+
+            html += '<div class="table-scroll-container" style="max-height: 600px;">';
+
+            let totalFacturasGeneral = 0;
+            let totalNCGeneral = 0;
+            let saldoPendienteGeneral = 0;
+            let documentosMostrados = 0;
 
             aniosOrdenados.forEach(anio => {
-                const docs = documentosPorAnio[anio];
-                const totalFacturas = docs.facturas.reduce((sum, f) => sum + f.valorBase, 0);
-                const totalNC = docs.nc.reduce((sum, nc) => sum + nc.valorBase, 0);
-                const netoAnio = totalFacturas - totalNC;
+                let docs = documentosPorAnio[anio];
 
-                html += `<div class="detalle-anio-header">${anio} - Neto: ${formatCurrency(netoAnio)}</div>`;
+                // Aplicar filtro si existe
+                if (filtro) {
+                    docs = docs.filter(d =>
+                        d.numero.toLowerCase().includes(filtro) ||
+                        d.concepto.toLowerCase().includes(filtro)
+                    );
+                }
 
-                // Facturas del año
-                if (docs.facturas.length > 0) {
-                    html += `<div class="detalle-tipo-header">Facturas (${docs.facturas.length})</div>`;
-                    html += `<table class="tabla-detalle-cliente">
-                        <thead>
-                            <tr>
-                                <th style="width: 100px;">Número</th>
-                                <th style="width: 100px;">Fecha</th>
-                                <th>Concepto</th>
-                                <th style="text-align: right; width: 120px;">Valor Base</th>
-                                <th style="text-align: right; width: 100px;">IVA</th>
-                                <th style="text-align: right; width: 120px;">Total</th>
-                                <th style="text-align: right; width: 120px;">Saldo</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
+                if (docs.length === 0) return;
 
-                    docs.facturas.sort((a, b) => b.fecha.localeCompare(a.fecha)).forEach(f => {
-                        html += `<tr>
-                            <td>${f.numero}</td>
+                // Ordenar por fecha descendente
+                docs.sort((a, b) => b.fecha.localeCompare(a.fecha));
+
+                const totalFacturasAnio = docs.reduce((sum, f) => sum + f.valorBase, 0);
+                const totalNCAnio = docs.reduce((sum, f) => sum + f.totalNC, 0);
+                const saldoAnio = docs.reduce((sum, f) => sum + f.saldo, 0);
+                const netoAnio = totalFacturasAnio - totalNCAnio;
+
+                totalFacturasGeneral += totalFacturasAnio;
+                totalNCGeneral += totalNCAnio;
+                saldoPendienteGeneral += saldoAnio;
+                documentosMostrados += docs.length;
+
+                html += `<div class="detalle-anio-header">${anio} - ${docs.length} facturas - Neto: ${formatCurrency(netoAnio)}</div>`;
+
+                html += `<table class="tabla-detalle-cliente">
+                    <thead>
+                        <tr>
+                            <th style="width: 120px;">Factura</th>
+                            <th style="width: 90px;">Fecha</th>
+                            <th style="min-width: 200px;">Concepto</th>
+                            <th style="text-align: right; width: 110px;">Total</th>
+                            <th style="text-align: right; width: 100px;">N. Crédito</th>
+                            <th style="text-align: right; width: 100px;">Pagado</th>
+                            <th style="text-align: right; width: 110px;">Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+                docs.forEach((f, idx) => {
+                    const tieneDetalle = f.notasCredito.length > 0 || f.pagos.length > 0;
+                    const rowId = `detalle-${anio}-${idx}`;
+
+                    // Badge de estado
+                    let estadoBadge = '';
+                    let saldoClass = f.saldo > 0 ? 'color: #dc2626; font-weight: 600;' : '';
+                    if (f.estado === 'anulada') {
+                        estadoBadge = '<span style="background: #dc3545; color: white; font-size: 9px; padding: 2px 6px; border-radius: 3px; margin-left: 6px;">ANULADA</span>';
+                        saldoClass = '';
+                    } else if (f.estado === 'pagada') {
+                        estadoBadge = '<span style="background: var(--verde); color: white; font-size: 9px; padding: 2px 6px; border-radius: 3px; margin-left: 6px;">PAGADA</span>';
+                        saldoClass = '';
+                    } else if (f.estado === 'nc_parcial') {
+                        estadoBadge = '<span style="background: var(--teal-principal); color: white; font-size: 9px; padding: 2px 6px; border-radius: 3px; margin-left: 6px;">NC PARCIAL</span>';
+                    }
+
+                    // Concepto truncado con botón "más"
+                    const conceptoEscapado = f.concepto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                    const conceptoCorto = f.concepto.length > 50 ? f.concepto.substring(0, 50).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : conceptoEscapado;
+                    const tieneConceptoLargo = f.concepto.length > 50;
+                    const conceptoHTML = tieneConceptoLargo
+                        ? `<span id="concepto-${rowId}" class="concepto-truncado" data-concepto-completo="${conceptoEscapado}">${conceptoCorto}... <button type="button" class="btn-ver-mas" data-row-id="${rowId}">más</button></span>`
+                        : `<span>${conceptoEscapado || '-'}</span>`;
+
+                    html += `
+                        <tr class="doc-row ${tieneDetalle ? 'expandible' : ''}"
+                            onclick="${tieneDetalle ? `toggleDetalleRow('${rowId}')` : ''}"
+                            style="${tieneDetalle ? 'cursor: pointer;' : ''}">
+                            <td>
+                                ${tieneDetalle ? `<span class="expand-icon" id="expand-${rowId}">▶</span>` : '<span style="width: 16px; display: inline-block;"></span>'}
+                                ${f.numero}${estadoBadge}
+                            </td>
                             <td>${formatDate(f.fecha)}</td>
-                            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${f.concepto}">${f.concepto || '-'}</td>
-                            <td style="text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(f.valorBase)}</td>
-                            <td style="text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(f.iva)}</td>
+                            <td style="max-width: 250px; overflow: hidden;">${conceptoHTML}</td>
                             <td style="text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(f.total)}</td>
-                            <td style="text-align: right; font-variant-numeric: tabular-nums; ${f.saldo > 0 ? 'color: #dc2626; font-weight: 600;' : ''}">${formatCurrency(f.saldo)}</td>
-                        </tr>`;
-                    });
+                            <td style="text-align: right; font-variant-numeric: tabular-nums; color: var(--teal-principal);">${f.totalNC > 0 ? formatCurrency(f.totalNC) : '-'}</td>
+                            <td style="text-align: right; font-variant-numeric: tabular-nums; color: var(--verde-vibrante);">${f.totalPagadoRC > 0 ? formatCurrency(f.totalPagadoRC) : '-'}</td>
+                            <td style="text-align: right; font-variant-numeric: tabular-nums; ${saldoClass}">${formatCurrency(f.saldo)}</td>
+                        </tr>
+                    `;
 
-                    html += `<tr class="subtotal-anio-row">
-                        <td colspan="3"><strong>Subtotal Facturas</strong></td>
-                        <td style="text-align: right;">${formatCurrency(totalFacturas)}</td>
-                        <td style="text-align: right;">${formatCurrency(docs.facturas.reduce((sum, f) => sum + f.iva, 0))}</td>
-                        <td style="text-align: right;">${formatCurrency(docs.facturas.reduce((sum, f) => sum + f.total, 0))}</td>
-                        <td style="text-align: right;">${formatCurrency(docs.facturas.reduce((sum, f) => sum + f.saldo, 0))}</td>
-                    </tr>`;
-                    html += `</tbody></table>`;
-                }
+                    // Fila expandible con NC y RC
+                    if (tieneDetalle) {
+                        html += `<tr class="detalle-subrow-container" id="subrow-${rowId}" style="display: none;">
+                            <td colspan="7" style="padding: 0; background: #f8f9fa;">
+                                <table style="width: 100%; margin: 0;">
+                                    <tbody>`;
 
-                // Notas crédito del año
-                if (docs.nc.length > 0) {
-                    html += `<div class="detalle-tipo-header nc-header">Notas Crédito (${docs.nc.length})</div>`;
-                    html += `<table class="tabla-detalle-cliente">
-                        <thead>
-                            <tr>
-                                <th style="width: 100px;">Número</th>
-                                <th style="width: 100px;">Fecha</th>
-                                <th>Concepto</th>
-                                <th style="text-align: right; width: 120px;">Valor Base</th>
-                                <th style="text-align: right; width: 100px;">IVA</th>
-                                <th style="text-align: right; width: 120px;">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
+                        // Notas crédito
+                        f.notasCredito.forEach(nc => {
+                            const ncConceptoCorto = nc.concepto && nc.concepto.length > 40 ? nc.concepto.substring(0, 40) + '...' : (nc.concepto || '-');
+                            html += `
+                                <tr class="pago-subrow">
+                                    <td style="padding-left: 40px; color: var(--teal-principal); font-size: 12px; width: 120px;">↳ ${nc.numero}</td>
+                                    <td style="font-size: 12px; width: 90px;">${formatDate(nc.fecha)}</td>
+                                    <td style="font-size: 11px; color: var(--gris-medio);" title="${nc.concepto || ''}">${ncConceptoCorto}</td>
+                                    <td style="text-align: right; font-size: 12px; color: var(--teal-principal); width: 110px;">-${formatCurrency(nc.total)}</td>
+                                    <td colspan="3"></td>
+                                </tr>
+                            `;
+                        });
 
-                    docs.nc.sort((a, b) => b.fecha.localeCompare(a.fecha)).forEach(nc => {
-                        html += `<tr class="nc-row">
-                            <td>${nc.numero}</td>
-                            <td>${formatDate(nc.fecha)}</td>
-                            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${nc.concepto}">${nc.concepto || '-'}</td>
-                            <td style="text-align: right; font-variant-numeric: tabular-nums;">-${formatCurrency(nc.valorBase)}</td>
-                            <td style="text-align: right; font-variant-numeric: tabular-nums;">-${formatCurrency(nc.iva)}</td>
-                            <td style="text-align: right; font-variant-numeric: tabular-nums;">-${formatCurrency(nc.total)}</td>
-                        </tr>`;
-                    });
+                        // Pagos (RC)
+                        f.pagos.forEach(p => {
+                            html += `
+                                <tr class="pago-subrow">
+                                    <td style="padding-left: 40px; color: var(--verde-vibrante); font-size: 12px; width: 120px;">↳ ${p.voucherNumero}</td>
+                                    <td style="font-size: 12px; width: 90px;">${formatDate(p.voucherFecha)}</td>
+                                    <td style="font-size: 11px; color: var(--gris-medio);">Recibo de Caja</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td style="text-align: right; font-size: 12px; color: var(--verde-vibrante); width: 100px;">${formatCurrency(p.valor)}</td>
+                                    <td></td>
+                                </tr>
+                            `;
+                        });
 
-                    html += `<tr class="subtotal-anio-row" style="background: #fef2f2 !important;">
-                        <td colspan="3" style="color: #991b1b; border-top-color: #dc2626;"><strong>Subtotal Notas Crédito</strong></td>
-                        <td style="text-align: right; color: #991b1b; border-top-color: #dc2626;">-${formatCurrency(totalNC)}</td>
-                        <td style="text-align: right; color: #991b1b; border-top-color: #dc2626;">-${formatCurrency(docs.nc.reduce((sum, nc) => sum + nc.iva, 0))}</td>
-                        <td style="text-align: right; color: #991b1b; border-top-color: #dc2626;">-${formatCurrency(docs.nc.reduce((sum, nc) => sum + nc.total, 0))}</td>
-                    </tr>`;
-                    html += `</tbody></table>`;
-                }
+                        html += `</tbody></table></td></tr>`;
+                    }
+                });
+
+                // Subtotal del año
+                html += `<tr class="subtotal-anio-row">
+                    <td colspan="3"><strong>Subtotal ${anio}</strong></td>
+                    <td style="text-align: right;">${formatCurrency(docs.reduce((s, f) => s + f.total, 0))}</td>
+                    <td style="text-align: right; color: var(--teal-principal);">${formatCurrency(totalNCAnio)}</td>
+                    <td style="text-align: right; color: var(--verde-vibrante);">${formatCurrency(docs.reduce((s, f) => s + f.totalPagadoRC, 0))}</td>
+                    <td style="text-align: right;">${formatCurrency(saldoAnio)}</td>
+                </tr>`;
+
+                html += `</tbody></table>`;
             });
 
             html += '</div>';
 
+            // Mostrar mensaje si no hay resultados
+            if (documentosMostrados === 0 && filtro) {
+                html = `
+                    <div class="detalle-search-container" style="margin-bottom: 16px;">
+                        <input type="text"
+                               id="searchDetalleCliente"
+                               placeholder="Buscar por número de factura o concepto..."
+                               value="${filtroDetalleCliente}"
+                               oninput="filtrarDetalleCliente(this.value)"
+                               style="width: 100%; padding: 10px 14px; border: 1px solid var(--gris-claro); border-radius: 6px; font-size: 14px;">
+                    </div>
+                    <div style="text-align: center; padding: 40px; color: var(--gris-medio);">
+                        No se encontraron facturas que coincidan con "${filtroDetalleCliente}"
+                    </div>
+                `;
+                return html;
+            }
+
             // Resumen total del cliente
-            const totalFacturasGeneral = Object.values(documentosPorAnio).reduce((sum, d) => sum + d.facturas.reduce((s, f) => s + f.valorBase, 0), 0);
-            const totalNCGeneral = Object.values(documentosPorAnio).reduce((sum, d) => sum + d.nc.reduce((s, nc) => s + nc.valorBase, 0), 0);
             const netoGeneral = totalFacturasGeneral - totalNCGeneral;
-            const saldoPendiente = Object.values(documentosPorAnio).reduce((sum, d) => sum + d.facturas.reduce((s, f) => s + f.saldo, 0), 0);
 
             html += `
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px;">
                     <div style="text-align: center;">
-                        <div style="font-size: 12px; color: var(--gris-medio); text-transform: uppercase;">Total Facturas</div>
+                        <div style="font-size: 12px; color: var(--gris-medio); text-transform: uppercase;">Total Facturado</div>
                         <div style="font-size: 18px; font-weight: 700; color: #16a34a;">${formatCurrency(totalFacturasGeneral)}</div>
                     </div>
                     <div style="text-align: center;">
                         <div style="font-size: 12px; color: var(--gris-medio); text-transform: uppercase;">Notas Crédito</div>
-                        <div style="font-size: 18px; font-weight: 700; color: #dc2626;">-${formatCurrency(totalNCGeneral)}</div>
+                        <div style="font-size: 18px; font-weight: 700; color: var(--teal-principal);">-${formatCurrency(totalNCGeneral)}</div>
                     </div>
                     <div style="text-align: center;">
                         <div style="font-size: 12px; color: var(--gris-medio); text-transform: uppercase;">Ventas Netas</div>
@@ -2139,13 +2707,78 @@
                     </div>
                     <div style="text-align: center;">
                         <div style="font-size: 12px; color: var(--gris-medio); text-transform: uppercase;">Saldo Pendiente</div>
-                        <div style="font-size: 18px; font-weight: 700; ${saldoPendiente > 0 ? 'color: #dc2626;' : 'color: #16a34a;'}">${formatCurrency(saldoPendiente)}</div>
+                        <div style="font-size: 18px; font-weight: 700; ${saldoPendienteGeneral > 0 ? 'color: #dc2626;' : 'color: #16a34a;'}">${formatCurrency(saldoPendienteGeneral)}</div>
                     </div>
                 </div>
             `;
 
             return html;
         }
+
+        // Filtrar detalle de cliente
+        function filtrarDetalleCliente(valor) {
+            filtroDetalleCliente = valor;
+            if (clienteSeleccionadoTabla) {
+                const row = document.querySelector(`.cliente-row[data-nit="${clienteSeleccionadoTabla}"]`);
+                if (row) {
+                    const nombre = row.getAttribute('data-nombre').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+                    const contenedor = document.getElementById('tablaDetalleCliente');
+                    if (contenedor) {
+                        contenedor.innerHTML = renderDetalleCliente(clienteSeleccionadoTabla, nombre);
+                        // Mantener el foco en el input
+                        const input = document.getElementById('searchDetalleCliente');
+                        if (input) {
+                            input.focus();
+                            input.setSelectionRange(input.value.length, input.value.length);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Toggle para expandir/colapsar detalle de factura
+        function toggleDetalleRow(rowId) {
+            const subrow = document.getElementById(`subrow-${rowId}`);
+            const expandIcon = document.getElementById(`expand-${rowId}`);
+            if (subrow) {
+                const isVisible = subrow.style.display !== 'none';
+                subrow.style.display = isVisible ? 'none' : 'table-row';
+                if (expandIcon) {
+                    expandIcon.textContent = isVisible ? '▶' : '▼';
+                }
+            }
+        }
+
+        // Toggle para mostrar/ocultar concepto completo
+        function toggleConcepto(rowId) {
+            const span = document.getElementById(`concepto-${rowId}`);
+            if (span) {
+                const conceptoCompleto = span.getAttribute('data-concepto-completo') || '';
+                const isExpanded = span.classList.contains('concepto-expandido');
+                if (isExpanded) {
+                    const conceptoCorto = conceptoCompleto.substring(0, 50);
+                    span.innerHTML = `${conceptoCorto}... <button type="button" class="btn-ver-mas" data-row-id="${rowId}">más</button>`;
+                    span.classList.remove('concepto-expandido');
+                    span.classList.add('concepto-truncado');
+                } else {
+                    span.innerHTML = `${conceptoCompleto} <button type="button" class="btn-ver-mas" data-row-id="${rowId}">menos</button>`;
+                    span.classList.remove('concepto-truncado');
+                    span.classList.add('concepto-expandido');
+                }
+            }
+        }
+
+        // Event listener delegado para botones "más/menos"
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn-ver-mas')) {
+                e.stopPropagation();
+                e.preventDefault();
+                const rowId = e.target.getAttribute('data-row-id');
+                if (rowId) {
+                    toggleConcepto(rowId);
+                }
+            }
+        });
 
         function calcularKPIs(facturasProcessed) {
             const carteraPendiente = facturasProcessed.reduce((sum, f) => sum + f.balance, 0);
@@ -2228,13 +2861,16 @@
                 <!-- Tabs -->
                 <div class="tabs-container">
                     <button class="tab-btn ${tabActiva === 'graficos' ? 'active' : ''}" onclick="cambiarTab('graficos')">
-                        Resumen Gráfico
+                        Resumen
                     </button>
                     <button class="tab-btn ${tabActiva === 'tablas' ? 'active' : ''}" onclick="cambiarTab('tablas')">
-                        Tablas Detalladas
+                        Facturación
                     </button>
                     <button class="tab-btn ${tabActiva === 'conciliacion' ? 'active' : ''}" onclick="cambiarTab('conciliacion')">
                         Análisis por Año
+                    </button>
+                    <button class="tab-btn ${tabActiva === 'cuentasPorCobrar' ? 'active' : ''}" onclick="cambiarTab('cuentasPorCobrar')">
+                        Cuentas por Cobrar
                     </button>
                 </div>
 
@@ -2285,7 +2921,7 @@
                             </select>
                         </div>
 
-                        ${tabActiva !== 'conciliacion' ? `
+                        ${(tabActiva !== 'conciliacion' && tabActiva !== 'cuentasPorCobrar') ? `
                         <div class="filter-divider"></div>
 
                         <div class="cierre-group">
@@ -2325,7 +2961,9 @@
                     })()
                     : tabActiva === 'tablas'
                         ? renderVistaTablas(kpis, facturasFiltradas)
-                        : renderVistaConciliacion()
+                        : tabActiva === 'cuentasPorCobrar'
+                            ? renderVistaCuentasPorCobrar()
+                            : renderVistaConciliacion()
                 }
             `;
 
@@ -2334,83 +2972,199 @@
         }
 
         function renderVistaGraficos(kpis, ventasPorMesAnio, ventasYTD) {
+            // Determinar el año y mes para filtrar ventas
+            const anioFiltro = filtros.cierreAnio ? parseInt(filtros.cierreAnio) : new Date().getFullYear();
+            const mesFiltro = filtros.cierreMes ? parseInt(filtros.cierreMes) : null;
+
+            // Calcular venta total del año/mes seleccionado
+            let ventasFiltradas = 0;
+            let ncFiltradas = 0;
+            let numFacturasFiltradas = 0;
+            let numNCFiltradas = 0;
+
+            facturas.forEach(f => {
+                if (!f.date) return;
+                const fechaFactura = new Date(f.date);
+                const anioFactura = fechaFactura.getFullYear();
+                const mesFactura = fechaFactura.getMonth() + 1;
+
+                if (anioFactura === anioFiltro) {
+                    if (!mesFiltro || mesFactura <= mesFiltro) {
+                        ventasFiltradas += (f.total || 0);
+                        numFacturasFiltradas++;
+                    }
+                }
+            });
+
+            notasCredito.forEach(nc => {
+                if (!nc.date) return;
+                const fechaNC = new Date(nc.date);
+                const anioNC = fechaNC.getFullYear();
+                const mesNC = fechaNC.getMonth() + 1;
+
+                if (anioNC === anioFiltro) {
+                    if (!mesFiltro || mesNC <= mesFiltro) {
+                        ncFiltradas += (nc.total || 0);
+                        numNCFiltradas++;
+                    }
+                }
+            });
+
+            const ventaNetaFiltrada = ventasFiltradas - ncFiltradas;
+            const etiquetaPeriodo = mesFiltro
+                ? `${MESES[mesFiltro - 1]} ${anioFiltro}`
+                : `Año ${anioFiltro}`;
+
+            // Calcular cartera crítica según horizonte seleccionado
+            let carteraCritica = 0;
+            let facturasCriticas = 0;
+            if (horizonteCritico === 60) {
+                carteraCritica = kpis.carteraPorHorizonte['61-90'] + kpis.carteraPorHorizonte['91-120'] + kpis.carteraPorHorizonte['>120'];
+                facturasCriticas = facturasProcessed.filter(f => f.dias > 60).length;
+            } else if (horizonteCritico === 90) {
+                carteraCritica = kpis.carteraPorHorizonte['91-120'] + kpis.carteraPorHorizonte['>120'];
+                facturasCriticas = facturasProcessed.filter(f => f.dias > 90).length;
+            } else {
+                carteraCritica = kpis.carteraPorHorizonte['>120'];
+                facturasCriticas = facturasProcessed.filter(f => f.dias > 120).length;
+            }
+
+            // Calcular conteo de facturas por horizonte
+            const facturasPorHorizonte = {
+                'porVencer': facturasProcessed.filter(f => f.dias < 0).length,
+                '0-30': facturasProcessed.filter(f => f.horizonte === '0-30').length,
+                '31-60': facturasProcessed.filter(f => f.horizonte === '31-60').length,
+                '61-90': facturasProcessed.filter(f => f.horizonte === '61-90').length,
+                '91-120': facturasProcessed.filter(f => f.horizonte === '91-120').length,
+                '>120': facturasProcessed.filter(f => f.horizonte === '>120').length
+            };
+
+            // Calcular saldo por vencer (facturas con días negativos o balance con due_date futuro)
+            const saldoPorVencer = facturasProcessed
+                .filter(f => f.dias < 0)
+                .reduce((sum, f) => sum + f.balance, 0);
+
+            // Filtrar datos de gráficas hasta el mes de cierre si está seleccionado
+            let ventasFiltradoMes = {};
+            let ventasYTDFiltrado = {};
+
+            ANIOS_VENTAS.forEach(anio => {
+                ventasFiltradoMes[anio] = {};
+                ventasYTDFiltrado[anio] = {};
+                let acumulado = 0;
+
+                for (let mes = 1; mes <= 12; mes++) {
+                    const valorMes = ventasPorMesAnio[anio]?.[mes]?.neto || 0;
+
+                    // Para el año de filtro, solo mostrar hasta el mes seleccionado
+                    if (anio === anioFiltro && mesFiltro && mes > mesFiltro) {
+                        ventasFiltradoMes[anio][mes] = { neto: 0, ventas: 0, nc: 0 };
+                        ventasYTDFiltrado[anio][mes] = acumulado; // Mantener el acumulado hasta ese punto
+                    } else {
+                        ventasFiltradoMes[anio][mes] = ventasPorMesAnio[anio]?.[mes] || { neto: 0, ventas: 0, nc: 0 };
+                        acumulado += valorMes;
+                        ventasYTDFiltrado[anio][mes] = acumulado;
+                    }
+                }
+            });
+
             return `
                 <!-- KPIs -->
-                <div class="kpi-grid">
+                <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Venta Total Neta</div>
+                        <div class="kpi-value" style="color: var(--verde-vibrante);">${formatCurrency(ventaNetaFiltrada)}</div>
+                        <div class="kpi-subtitle">${numFacturasFiltradas} facturas - ${numNCFiltradas} NC | ${etiquetaPeriodo}</div>
+                    </div>
                     <div class="kpi-card">
                         <div class="kpi-label">Cartera Pendiente</div>
                         <div class="kpi-value">${formatCurrency(kpis.carteraPendiente)}</div>
                         <div class="kpi-subtitle">${kpis.totalFacturas} facturas pendientes</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-label">Facturas Vencidas (+60 días)</div>
-                        <div class="kpi-value danger">${kpis.facturasVencidas}</div>
-                        <div class="kpi-subtitle">Requieren atención inmediata</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">Clientes con Cartera</div>
-                        <div class="kpi-value">${kpis.clientesUnicos}</div>
-                        <div class="kpi-subtitle">Clientes únicos</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">Cartera Crítica (+90 días)</div>
-                        <div class="kpi-value danger">${formatCurrency(kpis.carteraPorHorizonte['91-120'] + kpis.carteraPorHorizonte['>120'])}</div>
-                        <div class="kpi-subtitle">Mayor riesgo de incobrabilidad</div>
+                        <div class="kpi-label" style="display: flex; align-items: center; gap: 8px;">
+                            Cartera Crítica
+                            <select onchange="cambiarHorizonteCritico(this.value)"
+                                    style="padding: 2px 8px; font-size: 12px; border-radius: 4px; border: 1px solid var(--gris-claro); background: white; cursor: pointer;">
+                                <option value="60" ${horizonteCritico === 60 ? 'selected' : ''}>+60 días</option>
+                                <option value="90" ${horizonteCritico === 90 ? 'selected' : ''}>+90 días</option>
+                                <option value="120" ${horizonteCritico === 120 ? 'selected' : ''}>+120 días</option>
+                            </select>
+                        </div>
+                        <div class="kpi-value danger">${formatCurrency(carteraCritica)}</div>
+                        <div class="kpi-subtitle">${facturasCriticas} facturas | Mayor riesgo de incobrabilidad</div>
                     </div>
                 </div>
 
                 <!-- Gráfico de Ventas Mensuales -->
                 <div class="section sales-chart">
                     <h2 class="section-title">
-                        Ventas Mensuales Netas
+                        Ventas Mensuales Netas ${mesFiltro ? `(hasta ${MESES[mesFiltro - 1]})` : ''}
                         <span class="chart-subtitle">Comparativo año a año (Ventas - Notas Crédito)</span>
                     </h2>
-                    ${renderGraficoVentasMensuales(ventasPorMesAnio)}
+                    ${renderGraficoVentasMensuales(ventasFiltradoMes)}
                 </div>
 
                 <!-- Gráfico de Ventas YTD -->
                 <div class="section sales-chart">
                     <h2 class="section-title">
-                        Ventas Acumuladas (YTD)
+                        Ventas Acumuladas (YTD) ${mesFiltro ? `(hasta ${MESES[mesFiltro - 1]})` : ''}
                         <span class="chart-subtitle">Comparativo año a año (Rendimiento Acumulado)</span>
                     </h2>
-                    ${renderGraficoVentasYTD(ventasYTD)}
+                    ${renderGraficoVentasYTD(ventasYTDFiltrado)}
                 </div>
 
-                <!-- Horizonte -->
+                <!-- Resumen Ejecutivo de Cartera -->
                 <div class="section">
-                    <h2 class="section-title">Cartera por Horizonte de Vencimiento</h2>
-                    ${renderHorizonteBar(kpis.carteraPorHorizonte, kpis.carteraPendiente)}
-                </div>
-
-                <!-- Two Columns -->
-                <div class="two-columns">
-                    <div class="section">
-                        <h2 class="section-title">Top 10 Clientes por Cartera</h2>
-                        <ul class="cliente-list">
-                            ${kpis.topClientes.map((c, i) => `
-                                <li class="cliente-item">
-                                    <span class="cliente-rank">${i + 1}</span>
-                                    <div class="cliente-info">
-                                        <div class="cliente-name">${c.nombre}</div>
-                                        <div class="cliente-nit">NIT: ${c.nit}</div>
-                                    </div>
-                                    <span class="cliente-value">${formatCurrency(c.total)}</span>
-                                </li>
-                            `).join('')}
-                        </ul>
+                    <h2 class="section-title">Resumen Ejecutivo de Cartera</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Horizonte</th>
+                                    <th style="text-align: right;">Valor</th>
+                                    <th style="text-align: right;">Facturas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background: #f0fdf4;">
+                                    <td><strong>Cartera Total Pendiente</strong></td>
+                                    <td style="text-align: right; font-weight: 600;">${formatCurrency(kpis.carteraPendiente)}</td>
+                                    <td style="text-align: right; font-weight: 600;">${kpis.totalFacturas}</td>
+                                </tr>
+                                <tr>
+                                    <td>Saldo por Vencer</td>
+                                    <td style="text-align: right;">${formatCurrency(saldoPorVencer)}</td>
+                                    <td style="text-align: right;">${facturasPorHorizonte.porVencer}</td>
+                                </tr>
+                                <tr>
+                                    <td>Vencido 1-30 días</td>
+                                    <td style="text-align: right;">${formatCurrency(kpis.carteraPorHorizonte['0-30'])}</td>
+                                    <td style="text-align: right;">${facturasPorHorizonte['0-30']}</td>
+                                </tr>
+                                <tr>
+                                    <td>Vencido 31-60 días</td>
+                                    <td style="text-align: right;">${formatCurrency(kpis.carteraPorHorizonte['31-60'])}</td>
+                                    <td style="text-align: right;">${facturasPorHorizonte['31-60']}</td>
+                                </tr>
+                                <tr class="row-warning">
+                                    <td>Vencido 61-90 días</td>
+                                    <td style="text-align: right;">${formatCurrency(kpis.carteraPorHorizonte['61-90'])}</td>
+                                    <td style="text-align: right;">${facturasPorHorizonte['61-90']}</td>
+                                </tr>
+                                <tr class="row-danger">
+                                    <td>Vencido 91-120 días</td>
+                                    <td style="text-align: right;">${formatCurrency(kpis.carteraPorHorizonte['91-120'])}</td>
+                                    <td style="text-align: right;">${facturasPorHorizonte['91-120']}</td>
+                                </tr>
+                                <tr class="row-danger">
+                                    <td><strong>Vencido > 120 días (Crítica)</strong></td>
+                                    <td style="text-align: right; font-weight: 600;">${formatCurrency(kpis.carteraPorHorizonte['>120'])}</td>
+                                    <td style="text-align: right; font-weight: 600;">${facturasPorHorizonte['>120']}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-
-                    <div class="section">
-                        <h2 class="section-title">Cartera por Línea de Negocio</h2>
-                        ${renderCarteraPorLinea(kpis.carteraPorLinea, kpis.carteraPendiente)}
-                    </div>
-                </div>
-
-                <!-- Facturas Problemáticas -->
-                <div class="section">
-                    <h2 class="section-title">Facturas Problemáticas (más de 60 días)</h2>
-                    ${renderTablaFacturasCorta(kpis.facturasProblematicas)}
                 </div>
 
                 <!-- Powered by Métrik -->
@@ -2426,96 +3180,6 @@
             const todasLasFacturas = [...facturasFiltradas].sort((a, b) => b.dias - a.dias);
 
             return `
-                <!-- Resumen Ejecutivo -->
-                <div class="section">
-                    <h2 class="section-title">Resumen Ejecutivo</h2>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Concepto</th>
-                                    <th style="text-align: right;">Valor</th>
-                                    <th style="text-align: right;">Cantidad</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>Cartera Total Pendiente</strong></td>
-                                    <td style="text-align: right; font-weight: 600;">${formatCurrency(kpis.carteraPendiente)}</td>
-                                    <td style="text-align: right;">${kpis.totalFacturas} facturas</td>
-                                </tr>
-                                <tr>
-                                    <td>Cartera 0-30 días</td>
-                                    <td style="text-align: right;">${formatCurrency(kpis.carteraPorHorizonte['0-30'])}</td>
-                                    <td style="text-align: right;">${facturasFiltradas.filter(f => f.horizonte === '0-30').length}</td>
-                                </tr>
-                                <tr>
-                                    <td>Cartera 31-60 días</td>
-                                    <td style="text-align: right;">${formatCurrency(kpis.carteraPorHorizonte['31-60'])}</td>
-                                    <td style="text-align: right;">${facturasFiltradas.filter(f => f.horizonte === '31-60').length}</td>
-                                </tr>
-                                <tr class="row-warning">
-                                    <td>Cartera 61-90 días</td>
-                                    <td style="text-align: right;">${formatCurrency(kpis.carteraPorHorizonte['61-90'])}</td>
-                                    <td style="text-align: right;">${facturasFiltradas.filter(f => f.horizonte === '61-90').length}</td>
-                                </tr>
-                                <tr class="row-danger">
-                                    <td>Cartera 91-120 días</td>
-                                    <td style="text-align: right;">${formatCurrency(kpis.carteraPorHorizonte['91-120'])}</td>
-                                    <td style="text-align: right;">${facturasFiltradas.filter(f => f.horizonte === '91-120').length}</td>
-                                </tr>
-                                <tr class="row-danger">
-                                    <td><strong>Cartera > 120 días (Crítica)</strong></td>
-                                    <td style="text-align: right; font-weight: 600;">${formatCurrency(kpis.carteraPorHorizonte['>120'])}</td>
-                                    <td style="text-align: right;">${facturasFiltradas.filter(f => f.horizonte === '>120').length}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Cartera por Cliente -->
-                <div class="section">
-                    <h2 class="section-title">Cartera por Cliente</h2>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Cliente</th>
-                                    <th>NIT</th>
-                                    <th style="text-align: right;">Cartera Total</th>
-                                    <th style="text-align: right;">Facturas</th>
-                                    <th style="text-align: right;">Promedio Días</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${renderTablaClientes(facturasFiltradas)}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Cartera por Línea de Negocio -->
-                <div class="section">
-                    <h2 class="section-title">Cartera por Línea de Negocio</h2>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Línea de Negocio</th>
-                                    <th style="text-align: right;">Cartera Total</th>
-                                    <th style="text-align: right;">% del Total</th>
-                                    <th style="text-align: right;">Facturas</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${renderTablaLineas(facturasFiltradas, kpis.carteraPendiente)}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
                 <!-- Ventas por Cliente y Año -->
                 <div class="section">
                     <h2 class="section-title">Ventas por Cliente y Año (Clasificación de Clientes)</h2>
@@ -2862,9 +3526,10 @@
                 </div>
 
                 <div class="section">
-                    <h2 class="section-title">Ventas Netas por Cliente</h2>
+                    <h2 class="section-title">Ventas Netas por Cliente - Haz clic en un cliente para filtrar el detalle</h2>
                     <p style="color: var(--gris-medio); margin-bottom: 16px; font-size: 14px;">
                         Los valores ya incluyen el descuento de notas crédito. Valores netos para conciliación con Siigo.
+                        ${filtros.clienteConciliacion ? `<span style="background: var(--azul); color: white; padding: 4px 12px; border-radius: 20px; margin-left: 12px; font-size: 12px;">Filtrado: ${clientesMap[filtros.clienteConciliacion]?.nombre || filtros.clienteConciliacion} <span onclick="seleccionarClienteConciliacion('${filtros.clienteConciliacion}')" style="cursor: pointer; margin-left: 8px;">✕</span></span>` : ''}
                     </p>
 
                     <div class="table-scroll-container">
@@ -2885,7 +3550,9 @@
                                 </thead>
                                 <tbody>
                                     ${clientesArray.length > 0 ? clientesArray.map(c => `
-                                        <tr>
+                                        <tr onclick="seleccionarClienteConciliacion('${c.nit}')"
+                                            style="cursor: pointer; ${filtros.clienteConciliacion === c.nit ? 'background: #dbeafe; border-left: 4px solid var(--azul);' : ''}"
+                                            class="row-clickable ${filtros.clienteConciliacion === c.nit ? 'row-selected' : ''}">
                                             <td style="font-family: monospace; font-size: 12px;">${c.nit}</td>
                                             <td><strong>${c.nombre}</strong></td>
                                             <td style="text-align: center; color: #166534;">${c.numFacturas}</td>
@@ -2894,7 +3561,7 @@
                                             <td style="text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(c.subtotal)}</td>
                                             <td style="text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(c.impuestoCargo)}</td>
                                             <td style="text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(c.impuestoRetencion)}</td>
-                                            <td style="text-align: right; font-variant-numeric: tabular-nums; background: #f0fdf4; font-weight: 600;">${formatCurrency(c.total)}</td>
+                                            <td style="text-align: right; font-variant-numeric: tabular-nums; background: ${filtros.clienteConciliacion === c.nit ? '#bfdbfe' : '#f0fdf4'}; font-weight: 600;">${formatCurrency(c.total)}</td>
                                         </tr>
                                     `).join('') : `
                                         <tr>
@@ -2921,8 +3588,15 @@
                 </div>
 
                 <!-- Detalle de facturas del período -->
+                ${(() => {
+                    // Filtrar por cliente seleccionado si aplica
+                    const facturasDetalle = filtros.clienteConciliacion
+                        ? facturasDelPeriodo.filter(f => (f.customer?.identification || '') === filtros.clienteConciliacion)
+                        : facturasDelPeriodo;
+                    const clienteNombre = filtros.clienteConciliacion ? (clientesMap[filtros.clienteConciliacion]?.nombre || filtros.clienteConciliacion) : '';
+                    return `
                 <div class="section">
-                    <h2 class="section-title">Detalle de Facturas - ${periodoLabel} (${facturasDelPeriodo.length} facturas)</h2>
+                    <h2 class="section-title">Detalle de Facturas - ${periodoLabel} ${filtros.clienteConciliacion ? `- ${clienteNombre}` : ''} (${facturasDetalle.length} facturas)</h2>
                     <div class="table-scroll-container">
                         <div class="table-container">
                             <table>
@@ -2940,17 +3614,24 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${renderFilasDetalleConciliacion(facturasDelPeriodo)}
+                                    ${renderFilasDetalleConciliacion(facturasDetalle)}
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                </div>
+                </div>`;
+                })()}
 
                 <!-- Detalle de notas crédito del período -->
-                ${notasCreditoDelPeriodo.length > 0 ? `
+                ${(() => {
+                    // Filtrar por cliente seleccionado si aplica
+                    const ncDetalle = filtros.clienteConciliacion
+                        ? notasCreditoDelPeriodo.filter(nc => (nc.customer?.identification || '') === filtros.clienteConciliacion)
+                        : notasCreditoDelPeriodo;
+                    const clienteNombre = filtros.clienteConciliacion ? (clientesMap[filtros.clienteConciliacion]?.nombre || filtros.clienteConciliacion) : '';
+                    return ncDetalle.length > 0 ? `
                 <div class="section">
-                    <h2 class="section-title" style="color: var(--rojo);">Detalle de Notas Crédito - ${periodoLabel} (${notasCreditoDelPeriodo.length} NC)</h2>
+                    <h2 class="section-title" style="color: var(--rojo);">Detalle de Notas Crédito - ${periodoLabel} ${filtros.clienteConciliacion ? `- ${clienteNombre}` : ''} (${ncDetalle.length} NC)</h2>
                     <div class="table-scroll-container">
                         <div class="table-container">
                             <table>
@@ -2967,13 +3648,49 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${renderFilasDetalleNC(notasCreditoDelPeriodo)}
+                                    ${renderFilasDetalleNC(ncDetalle)}
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-                ` : ''}
+                ` : '';
+                })()}
+
+                <!-- Cartera por Línea de Negocio -->
+                ${(() => {
+                    // Calcular cartera por línea de negocio usando las facturas procesadas
+                    const carteraPorLinea = {};
+                    let totalCartera = 0;
+
+                    // Filtrar facturas por cliente si está seleccionado
+                    let facturasParaCartera = facturasProcessed.filter(f => f.balance > 0);
+                    if (filtros.clienteConciliacion) {
+                        facturasParaCartera = facturasParaCartera.filter(f => f.clienteNit === filtros.clienteConciliacion);
+                    }
+
+                    facturasParaCartera.forEach(f => {
+                        const linea = f.lineaNegocio || 'Sin asignar';
+                        if (!carteraPorLinea[linea]) {
+                            carteraPorLinea[linea] = 0;
+                        }
+                        carteraPorLinea[linea] += f.balance;
+                        totalCartera += f.balance;
+                    });
+
+                    const clienteNombre = filtros.clienteConciliacion ? (clientesMap[filtros.clienteConciliacion]?.nombre || filtros.clienteConciliacion) : '';
+
+                    return `
+                <div class="section">
+                    <h2 class="section-title">Cartera por Línea de Negocio ${filtros.clienteConciliacion ? `- ${clienteNombre}` : ''}</h2>
+                    <p style="color: var(--gris-medio); margin-bottom: 16px; font-size: 14px;">
+                        Distribución del saldo pendiente de cobro por línea de negocio. Total: <strong>${formatCurrency(totalCartera)}</strong>
+                    </p>
+                    <div class="chart-container linea-chart">
+                        ${renderCarteraPorLinea(carteraPorLinea, totalCartera)}
+                    </div>
+                </div>`;
+                })()}
 
                 <!-- Powered by Métrik -->
                 <div class="powered-by-footer">
@@ -2981,6 +3698,572 @@
                     <img src="https://i.ibb.co/sdb3Bpq5/M-trik-logo-iso.png" alt="Métrik" class="metrik-logo">
                 </div>
             `;
+        }
+
+        // Vista de Cuentas por Cobrar - Replica el reporte "Cuentas por cobrar general por cliente" de Siigo
+        function renderVistaCuentasPorCobrar() {
+            // Usar TODAS las facturas (no solo las procesadas con balance > 0)
+            // para poder calcular también los saldos a favor
+            const hoy = new Date();
+
+            // Agrupar facturas por cliente con cálculo de aging basado en due_date
+            const cuentasPorCliente = {};
+
+            facturas.forEach(f => {
+                const nit = f.customer?.identification || 'N/A';
+                const clienteInfo = clientesMap[nit] || { nombre: nit };
+                const balance = f.balance || 0;
+
+                // Obtener due_date del payment (fecha de vencimiento)
+                // Si no hay payments, usar la fecha de factura + 30 días como default
+                let dueDate = null;
+                if (f.payments && f.payments.length > 0 && f.payments[0].due_date) {
+                    dueDate = new Date(f.payments[0].due_date);
+                } else if (f.date) {
+                    dueDate = new Date(f.date);
+                    dueDate.setDate(dueDate.getDate() + 30);
+                }
+
+                if (!cuentasPorCliente[nit]) {
+                    cuentasPorCliente[nit] = {
+                        nit: nit,
+                        nombre: clienteInfo.nombre,
+                        vencido1a30: 0,
+                        vencido31a60: 0,
+                        vencido61a90: 0,
+                        vencidoMas91: 0,
+                        saldoPorVencer: 0,
+                        saldoAFavor: 0,
+                        totalCartera: 0
+                    };
+                }
+
+                // Si el balance es negativo, es saldo a favor
+                if (balance < 0) {
+                    cuentasPorCliente[nit].saldoAFavor += Math.abs(balance);
+                } else if (balance > 0 && dueDate) {
+                    // Calcular días de vencimiento
+                    const diasVencido = Math.floor((hoy - dueDate) / (1000 * 60 * 60 * 24));
+
+                    if (diasVencido < 0) {
+                        // Aún no vence
+                        cuentasPorCliente[nit].saldoPorVencer += balance;
+                    } else if (diasVencido <= 30) {
+                        cuentasPorCliente[nit].vencido1a30 += balance;
+                    } else if (diasVencido <= 60) {
+                        cuentasPorCliente[nit].vencido31a60 += balance;
+                    } else if (diasVencido <= 90) {
+                        cuentasPorCliente[nit].vencido61a90 += balance;
+                    } else {
+                        cuentasPorCliente[nit].vencidoMas91 += balance;
+                    }
+                }
+            });
+
+            // También procesar notas crédito como saldo a favor
+            notasCredito.forEach(nc => {
+                const nit = nc.customer?.identification || 'N/A';
+                const clienteInfo = clientesMap[nit] || { nombre: nit };
+                const balance = nc.balance || 0;
+
+                if (balance > 0) {
+                    if (!cuentasPorCliente[nit]) {
+                        cuentasPorCliente[nit] = {
+                            nit: nit,
+                            nombre: clienteInfo.nombre,
+                            vencido1a30: 0,
+                            vencido31a60: 0,
+                            vencido61a90: 0,
+                            vencidoMas91: 0,
+                            saldoPorVencer: 0,
+                            saldoAFavor: 0,
+                            totalCartera: 0
+                        };
+                    }
+                    cuentasPorCliente[nit].saldoAFavor += balance;
+                }
+            });
+
+            // Calcular total cartera para cada cliente
+            Object.values(cuentasPorCliente).forEach(c => {
+                const totalDebito = c.vencido1a30 + c.vencido31a60 + c.vencido61a90 + c.vencidoMas91 + c.saldoPorVencer;
+                c.totalCartera = totalDebito - c.saldoAFavor;
+            });
+
+            // Convertir a array y ordenar por total cartera descendente
+            let clientesArray = Object.values(cuentasPorCliente)
+                .filter(c => c.totalCartera !== 0 || c.saldoAFavor > 0)
+                .sort((a, b) => b.totalCartera - a.totalCartera);
+
+            // Aplicar filtros si están activos
+            if (filtros.cliente) {
+                clientesArray = clientesArray.filter(c => c.nit === filtros.cliente);
+            }
+
+            // Calcular totales
+            const totales = clientesArray.reduce((acc, c) => ({
+                vencido1a30: acc.vencido1a30 + c.vencido1a30,
+                vencido31a60: acc.vencido31a60 + c.vencido31a60,
+                vencido61a90: acc.vencido61a90 + c.vencido61a90,
+                vencidoMas91: acc.vencidoMas91 + c.vencidoMas91,
+                saldoPorVencer: acc.saldoPorVencer + c.saldoPorVencer,
+                saldoAFavor: acc.saldoAFavor + c.saldoAFavor,
+                totalCartera: acc.totalCartera + c.totalCartera
+            }), {
+                vencido1a30: 0,
+                vencido31a60: 0,
+                vencido61a90: 0,
+                vencidoMas91: 0,
+                saldoPorVencer: 0,
+                saldoAFavor: 0,
+                totalCartera: 0
+            });
+
+            // Función para formatear valores en la tabla
+            const formatVal = (val) => {
+                if (val === 0) return '<span style="color: var(--gris-medio);">0</span>';
+                return formatNumber(Math.round(val * 100) / 100);
+            };
+
+            // Generar filas de la tabla con onclick
+            const filasHTML = clientesArray.map(c => `
+                <tr onclick="seleccionarClienteCxC('${c.nit}', '${c.nombre.replace(/'/g, "\\'")}')" data-nit="${c.nit}">
+                    <td>${c.nit}</td>
+                    <td>${c.nombre}</td>
+                    <td>${formatVal(c.vencido1a30)}</td>
+                    <td class="${c.vencido31a60 > 0 ? 'cxc-warning' : ''}">${formatVal(c.vencido31a60)}</td>
+                    <td class="${c.vencido61a90 > 0 ? 'cxc-warning' : ''}">${formatVal(c.vencido61a90)}</td>
+                    <td class="${c.vencidoMas91 > 0 ? 'cxc-danger' : ''}">${formatVal(c.vencidoMas91)}</td>
+                    <td>${formatVal(c.saldoPorVencer)}</td>
+                    <td class="${c.saldoAFavor > 0 ? 'cxc-saldo-favor' : ''}">${formatVal(c.saldoAFavor)}</td>
+                    <td class="${c.totalCartera < 0 ? 'cxc-total-cartera-negative' : 'cxc-total-cartera-positive'}">${formatVal(c.totalCartera)}</td>
+                </tr>
+            `).join('');
+
+            return `
+                <!-- Resumen de Cuentas por Cobrar -->
+                <div class="cxc-summary-cards">
+                    <div class="cxc-summary-card">
+                        <div class="cxc-summary-card-label">Total Cartera</div>
+                        <div class="cxc-summary-card-value ${totales.totalCartera < 0 ? 'negative' : ''}">${formatCurrency(totales.totalCartera)}</div>
+                    </div>
+                    <div class="cxc-summary-card">
+                        <div class="cxc-summary-card-label">Total Vencido</div>
+                        <div class="cxc-summary-card-value">${formatCurrency(totales.vencido1a30 + totales.vencido31a60 + totales.vencido61a90 + totales.vencidoMas91)}</div>
+                    </div>
+                    <div class="cxc-summary-card">
+                        <div class="cxc-summary-card-label">Por Vencer</div>
+                        <div class="cxc-summary-card-value">${formatCurrency(totales.saldoPorVencer)}</div>
+                    </div>
+                    <div class="cxc-summary-card">
+                        <div class="cxc-summary-card-label">Saldo a Favor</div>
+                        <div class="cxc-summary-card-value negative">${formatCurrency(totales.saldoAFavor)}</div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Cuentas por Cobrar -->
+                <div class="cxc-container">
+                    <div class="cxc-header">
+                        <div>
+                            <div class="cxc-title">Cuentas por Cobrar General por Cliente</div>
+                            <div class="cxc-subtitle">${clientesArray.length} clientes con saldo</div>
+                        </div>
+                        <div class="cxc-subtitle">Procesado: ${new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
+
+                    <div class="cxc-table-wrapper">
+                        <table class="cxc-table">
+                            <thead>
+                                <tr>
+                                    <th>Identificación</th>
+                                    <th>Cliente</th>
+                                    <th>Vencido 1 a 30</th>
+                                    <th>Vencido 31 a 60</th>
+                                    <th>Vencido 61 a 90</th>
+                                    <th>Vencido más de 91</th>
+                                    <th>Saldo por vencer</th>
+                                    <th>Saldo a favor</th>
+                                    <th>Total cartera</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${filasHTML}
+                                <tr class="total-row">
+                                    <td colspan="2"><strong>Total general</strong></td>
+                                    <td>${formatNumber(Math.round(totales.vencido1a30 * 100) / 100)}</td>
+                                    <td>${formatNumber(Math.round(totales.vencido31a60 * 100) / 100)}</td>
+                                    <td>${formatNumber(Math.round(totales.vencido61a90 * 100) / 100)}</td>
+                                    <td>${formatNumber(Math.round(totales.vencidoMas91 * 100) / 100)}</td>
+                                    <td>${formatNumber(Math.round(totales.saldoPorVencer * 100) / 100)}</td>
+                                    <td>${formatNumber(Math.round(totales.saldoAFavor * 100) / 100)}</td>
+                                    <td>${formatNumber(Math.round(totales.totalCartera * 100) / 100)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="cxc-info">
+                        Haga clic en un cliente para ver el detalle de sus documentos.
+                    </div>
+                </div>
+
+                <!-- Detalle de documentos del cliente seleccionado -->
+                <div id="cxcDetalleContainer"></div>
+
+                <!-- Powered by Métrik -->
+                <div class="powered-by-footer">
+                    <span>Powered by</span>
+                    <img src="https://i.ibb.co/sdb3Bpq5/M-trik-logo-iso.png" alt="Métrik" class="metrik-logo">
+                </div>
+            `;
+        }
+
+        // Estado para el filtro de documentos saldados
+        let cxcOcultarSaldados = true;
+        let cxcClienteSeleccionado = null;
+
+        // Función para seleccionar cliente y mostrar sus documentos
+        function seleccionarClienteCxC(nit, nombre) {
+            cxcClienteSeleccionado = { nit, nombre };
+
+            // Marcar fila como seleccionada
+            document.querySelectorAll('.cxc-table tbody tr').forEach(tr => {
+                tr.classList.remove('selected');
+                if (tr.dataset.nit === nit) {
+                    tr.classList.add('selected');
+                }
+            });
+
+            renderDetalleCxC();
+        }
+
+        // Función para renderizar el detalle de documentos
+        function renderDetalleCxC() {
+            if (!cxcClienteSeleccionado) return;
+
+            const { nit, nombre } = cxcClienteSeleccionado;
+            const container = document.getElementById('cxcDetalleContainer');
+            if (!container) return;
+
+            // Construir índice de notas crédito por factura vinculada
+            const ncPorFactura = {};
+            notasCredito.forEach(nc => {
+                if (nc.customer?.identification === nit && nc.invoice?.name) {
+                    const facturaKey = nc.invoice.name;
+                    if (!ncPorFactura[facturaKey]) {
+                        ncPorFactura[facturaKey] = [];
+                    }
+                    ncPorFactura[facturaKey].push({
+                        numero: nc.name,
+                        fecha: nc.date,
+                        total: nc.total || 0,
+                        balance: nc.balance || 0
+                    });
+                }
+            });
+
+            // Solo facturas - las NC y RC se asocian a cada una
+            const documentos = [];
+
+            facturas.forEach(f => {
+                if (f.customer?.identification === nit) {
+                    const dueDate = f.payments?.[0]?.due_date || null;
+                    const facturaName = f.name || `${f.prefix}-${f.number}`;
+
+                    // Buscar pagos (RC) asociados
+                    const llavesPosibles = [facturaName, `FV-2-${f.number}`, `FV-1-${f.number}`, `${f.prefix}-${f.number}`];
+                    let pagosFactura = [];
+                    for (const llave of llavesPosibles) {
+                        if (pagosPorFactura[llave]) {
+                            pagosFactura = pagosPorFactura[llave];
+                            break;
+                        }
+                    }
+
+                    // Buscar notas crédito asociadas
+                    let notasCreditoFactura = [];
+                    for (const llave of llavesPosibles) {
+                        if (ncPorFactura[llave]) {
+                            notasCreditoFactura = ncPorFactura[llave];
+                            break;
+                        }
+                    }
+
+                    // Calcular totales
+                    const totalPagadoRC = pagosFactura
+                        .filter(p => p.movimiento === 'Credit')
+                        .reduce((sum, p) => sum + p.valor, 0);
+
+                    const totalNC = notasCreditoFactura.reduce((sum, nc) => sum + nc.total, 0);
+
+                    // Saldo calculado = Total - Pagos RC - Notas Crédito
+                    const saldoCalculado = (f.total || 0) - totalPagadoRC - totalNC;
+                    const saldoReportado = f.balance || 0;
+                    const diferencia = Math.abs(saldoReportado - saldoCalculado);
+                    const hayDiscrepancia = diferencia > 1;
+
+                    // Determinar estado
+                    let estado = 'pendiente';
+                    if (totalNC >= (f.total || 0) * 0.99) { // 99% para tolerancia
+                        estado = 'anulada';
+                    } else if (saldoReportado === 0 && totalPagadoRC > 0) {
+                        estado = 'pagada';
+                    } else if (saldoReportado === 0) {
+                        estado = 'saldada';
+                    } else if (totalNC > 0) {
+                        estado = 'nc_parcial';
+                    }
+
+                    documentos.push({
+                        numero: `${f.prefix || 'FE'}-${f.number}`,
+                        nombreSiigo: facturaName,
+                        fecha: f.date,
+                        fechaVencimiento: dueDate,
+                        total: f.total || 0,
+                        balance: f.balance || 0,
+                        pagos: pagosFactura,
+                        notasCredito: notasCreditoFactura,
+                        totalPagadoRC: totalPagadoRC,
+                        totalNC: totalNC,
+                        saldoCalculado: saldoCalculado,
+                        hayDiscrepancia: hayDiscrepancia,
+                        diferencia: diferencia,
+                        estado: estado
+                    });
+                }
+            });
+
+            // Ordenar por fecha descendente
+            documentos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            // Filtrar si está activo el checkbox
+            const documentosFiltrados = cxcOcultarSaldados
+                ? documentos.filter(d => d.balance !== 0)
+                : documentos;
+
+            // Calcular totales
+            const totalFacturado = documentos.reduce((sum, d) => sum + d.total, 0);
+            const totalNCGlobal = documentos.reduce((sum, d) => sum + d.totalNC, 0);
+            const totalPagadoGlobal = documentos.reduce((sum, d) => sum + d.totalPagadoRC, 0);
+            const totalPendiente = documentos.reduce((sum, d) => sum + d.balance, 0);
+            const documentosConDiscrepancia = documentos.filter(d => d.hayDiscrepancia).length;
+            const facturasAnuladas = documentos.filter(d => d.estado === 'anulada').length;
+
+            // Generar HTML de la tabla
+            const filasHTML = documentosFiltrados.map((d, idx) => {
+                const tieneDetalle = d.pagos.length > 0 || d.notasCredito.length > 0;
+
+                // Determinar clase y badge según estado
+                let estadoBadge = '';
+                let balanceClass = 'saldo-pendiente';
+                if (d.estado === 'anulada') {
+                    estadoBadge = '<span style="background: #dc3545; color: white; font-size: 9px; padding: 2px 6px; border-radius: 3px; margin-left: 6px;">ANULADA</span>';
+                    balanceClass = 'saldo-cero';
+                } else if (d.estado === 'pagada') {
+                    estadoBadge = '<span style="background: var(--verde); color: white; font-size: 9px; padding: 2px 6px; border-radius: 3px; margin-left: 6px;">PAGADA</span>';
+                    balanceClass = 'saldo-cero';
+                } else if (d.estado === 'saldada') {
+                    balanceClass = 'saldo-cero';
+                } else if (d.estado === 'nc_parcial') {
+                    estadoBadge = '<span style="background: var(--teal-principal); color: white; font-size: 9px; padding: 2px 6px; border-radius: 3px; margin-left: 6px;">NC PARCIAL</span>';
+                }
+
+                const discrepanciaIcon = d.hayDiscrepancia ? '<span style="color: var(--naranja); margin-left: 4px;" title="Discrepancia detectada">⚠</span>' : '';
+
+                // Calcular aging basado en fecha de vencimiento
+                let agingHTML = '-';
+                if (d.fechaVencimiento && d.balance > 0) {
+                    const hoy = new Date();
+                    const fechaVenc = new Date(d.fechaVencimiento);
+                    const diasDesdeVencimiento = Math.floor((hoy - fechaVenc) / (1000 * 60 * 60 * 24));
+
+                    if (diasDesdeVencimiento < 0) {
+                        // Aún no vence
+                        agingHTML = '<span style="background: var(--verde); color: white; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 600;">Por vencer</span>';
+                    } else if (diasDesdeVencimiento <= 30) {
+                        agingHTML = '<span style="background: var(--amarillo); color: white; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 600;">1-30 días</span>';
+                    } else if (diasDesdeVencimiento <= 60) {
+                        agingHTML = '<span style="background: var(--naranja); color: white; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 600;">31-60 días</span>';
+                    } else if (diasDesdeVencimiento <= 90) {
+                        agingHTML = '<span style="background: #e85d04; color: white; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 600;">61-90 días</span>';
+                    } else if (diasDesdeVencimiento <= 120) {
+                        agingHTML = '<span style="background: var(--rojo); color: white; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 600;">91-120 días</span>';
+                    } else {
+                        agingHTML = '<span style="background: var(--rojo-oscuro); color: white; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 600;">&gt;120 días</span>';
+                    }
+                } else if (d.balance === 0) {
+                    agingHTML = '<span style="color: var(--gris-medio); font-size: 11px;">Saldado</span>';
+                }
+
+                // Fila principal
+                let html = `
+                    <tr class="doc-row ${tieneDetalle ? 'expandible' : ''}" onclick="${tieneDetalle ? `togglePagosRow(${idx})` : ''}" style="${tieneDetalle ? 'cursor: pointer;' : ''}">
+                        <td>
+                            ${tieneDetalle ? '<span class="expand-icon" id="expand-' + idx + '">▶</span>' : '<span style="width: 16px; display: inline-block;"></span>'}
+                            ${d.numero}${estadoBadge}${discrepanciaIcon}
+                        </td>
+                        <td>${formatDate(d.fecha)}</td>
+                        <td>${agingHTML}</td>
+                        <td class="text-right">${formatCurrency(d.total)}</td>
+                        <td class="text-right" style="color: var(--teal-principal);">${d.totalNC > 0 ? formatCurrency(d.totalNC) : '-'}</td>
+                        <td class="text-right" style="color: var(--verde-vibrante);">${d.totalPagadoRC > 0 ? formatCurrency(d.totalPagadoRC) : '-'}</td>
+                        <td class="text-right ${balanceClass}">${formatCurrency(d.balance)}</td>
+                    </tr>
+                `;
+
+                // Fila expandible con detalle
+                if (tieneDetalle) {
+                    // Notas crédito
+                    const ncHTML = d.notasCredito.map(nc => `
+                        <tr class="pago-subrow">
+                            <td style="padding-left: 40px; color: var(--teal-principal); font-size: 11px;">
+                                ↳ ${nc.numero}
+                            </td>
+                            <td style="font-size: 11px;">${formatDate(nc.fecha)}</td>
+                            <td style="font-size: 11px; color: var(--gris-medio);">Nota Crédito</td>
+                            <td></td>
+                            <td class="text-right" style="font-size: 11px; color: var(--teal-principal);">
+                                -${formatCurrency(nc.total)}
+                            </td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    `).join('');
+
+                    // Pagos (RC)
+                    const pagosHTML = d.pagos.filter(p => p.movimiento === 'Credit').map(p => `
+                        <tr class="pago-subrow">
+                            <td style="padding-left: 40px; color: var(--verde-vibrante); font-size: 11px;">
+                                ↳ ${p.voucherNumero}
+                            </td>
+                            <td style="font-size: 11px;">${formatDate(p.voucherFecha)}</td>
+                            <td style="font-size: 11px; color: var(--gris-medio);">Recibo Caja</td>
+                            <td></td>
+                            <td></td>
+                            <td class="text-right" style="font-size: 11px; color: var(--verde-vibrante);">
+                                ${formatCurrency(p.valor)}
+                            </td>
+                            <td></td>
+                        </tr>
+                    `).join('');
+
+                    // Fila de conciliación si hay discrepancia
+                    const conciliacionHTML = d.hayDiscrepancia ? `
+                        <tr class="pago-subrow" style="background: #fff3cd;">
+                            <td colspan="4" style="padding-left: 40px; color: var(--naranja); font-size: 11px; font-weight: 600;">
+                                ⚠ Discrepancia: Saldo calculado ${formatCurrency(d.saldoCalculado)} vs reportado ${formatCurrency(d.balance)} (dif: ${formatCurrency(d.diferencia)})
+                            </td>
+                            <td colspan="3"></td>
+                        </tr>
+                    ` : '';
+
+                    html += `<tr class="pagos-container" id="pagos-${idx}" style="display: none;">
+                        <td colspan="7" style="padding: 0; background: #f8f9fa;">
+                            <table class="cxc-detalle-table" style="margin: 0;">
+                                <tbody>
+                                    ${ncHTML}
+                                    ${pagosHTML}
+                                    ${conciliacionHTML}
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>`;
+                }
+
+                return html;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="cxc-detalle-container">
+                    <div class="cxc-detalle-header">
+                        <div>
+                            <div class="cxc-detalle-title">Documentos del Cliente</div>
+                            <div class="cxc-detalle-cliente">${nit} - ${nombre}</div>
+                        </div>
+                        <div class="cxc-detalle-controls">
+                            <label class="cxc-checkbox-label">
+                                <input type="checkbox" id="cxcOcultarSaldados" ${cxcOcultarSaldados ? 'checked' : ''} onchange="toggleOcultarSaldados(this.checked)">
+                                Ocultar documentos saldados
+                            </label>
+                        </div>
+                    </div>
+
+                    ${documentosConDiscrepancia > 0 ? `
+                        <div style="background: #fff3cd; padding: 10px 20px; border-bottom: 1px solid #ffc107; font-size: 13px;">
+                            <strong style="color: var(--naranja);">⚠ ${documentosConDiscrepancia} documento(s) con discrepancia</strong> entre el saldo reportado y los pagos registrados en vouchers.
+                        </div>
+                    ` : ''}
+
+                    ${documentosFiltrados.length > 0 ? `
+                        <div class="cxc-detalle-scroll">
+                            <table class="cxc-detalle-table">
+                                <thead>
+                                    <tr>
+                                        <th>Factura</th>
+                                        <th>Fecha</th>
+                                        <th>Aging</th>
+                                        <th class="text-right">Total</th>
+                                        <th class="text-right">N. Crédito</th>
+                                        <th class="text-right">Pagado (RC)</th>
+                                        <th class="text-right">Saldo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${filasHTML}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="cxc-detalle-summary">
+                            <div class="cxc-detalle-summary-item">
+                                <span class="cxc-detalle-summary-label">Documentos:</span>
+                                <span class="cxc-detalle-summary-value">${documentos.length} (${documentosFiltrados.length} mostrados)</span>
+                            </div>
+                            <div class="cxc-detalle-summary-item">
+                                <span class="cxc-detalle-summary-label">Facturado:</span>
+                                <span class="cxc-detalle-summary-value">${formatCurrency(totalFacturado)}</span>
+                            </div>
+                            <div class="cxc-detalle-summary-item">
+                                <span class="cxc-detalle-summary-label">Pagado (RC):</span>
+                                <span class="cxc-detalle-summary-value" style="color: var(--verde-vibrante);">${formatCurrency(totalPagadoGlobal)}</span>
+                            </div>
+                            <div class="cxc-detalle-summary-item">
+                                <span class="cxc-detalle-summary-label">Notas Crédito:</span>
+                                <span class="cxc-detalle-summary-value" style="color: var(--teal-principal);">${formatCurrency(totalNCGlobal)}</span>
+                            </div>
+                            <div class="cxc-detalle-summary-item">
+                                <span class="cxc-detalle-summary-label">Saldo Pendiente:</span>
+                                <span class="cxc-detalle-summary-value" style="color: ${totalPendiente >= 0 ? 'var(--rojo)' : 'var(--teal-principal)'};">${formatCurrency(totalPendiente)}</span>
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="cxc-detalle-empty">
+                            No hay documentos ${cxcOcultarSaldados ? 'con saldo pendiente' : ''} para este cliente.
+                        </div>
+                    `}
+                </div>
+            `;
+
+            // Scroll al detalle
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Toggle para expandir/colapsar pagos de una factura
+        function togglePagosRow(idx) {
+            const pagosRow = document.getElementById(`pagos-${idx}`);
+            const expandIcon = document.getElementById(`expand-${idx}`);
+            if (pagosRow) {
+                const isVisible = pagosRow.style.display !== 'none';
+                pagosRow.style.display = isVisible ? 'none' : 'table-row';
+                if (expandIcon) {
+                    expandIcon.textContent = isVisible ? '▶' : '▼';
+                }
+            }
+        }
+
+        // Toggle para ocultar/mostrar documentos saldados
+        function toggleOcultarSaldados(checked) {
+            cxcOcultarSaldados = checked;
+            renderDetalleCxC();
         }
 
         // Calcular ventas mensuales del año seleccionado para análisis
@@ -3133,9 +4416,23 @@
         // Función para cambiar el año de análisis
         function cambiarAnioAnalisis(nuevoAnio) {
             anioAnalisis = parseInt(nuevoAnio);
-            // Resetear filtros de mes
+            // Resetear filtros de mes y cliente
             filtros.cierreAnio = String(anioAnalisis);
             filtros.cierreMes = String(new Date().getMonth() + 1);
+            filtros.clienteConciliacion = '';  // Resetear cliente seleccionado
+            const kpis = calcularKPIs(aplicarFiltros(facturasProcessed));
+            const opciones = obtenerOpcionesFiltros(facturasProcessed);
+            renderDashboard(kpis, opciones, aplicarFiltros(facturasProcessed));
+        }
+
+        // Función para seleccionar cliente desde la tabla de Ventas Netas por Cliente
+        function seleccionarClienteConciliacion(nit) {
+            // Toggle: si ya está seleccionado, deseleccionar
+            if (filtros.clienteConciliacion === nit) {
+                filtros.clienteConciliacion = '';
+            } else {
+                filtros.clienteConciliacion = nit;
+            }
             const kpis = calcularKPIs(aplicarFiltros(facturasProcessed));
             const opciones = obtenerOpcionesFiltros(facturasProcessed);
             renderDashboard(kpis, opciones, aplicarFiltros(facturasProcessed));
@@ -3407,25 +4704,24 @@
         // Formato de valores en millones
         function formatMillones(valor) {
             if (valor >= 1000000000) {
-                return '$' + (valor / 1000000000).toFixed(1) + 'B';
+                return '$' + Math.round(valor / 1000000000) + 'B';
             } else if (valor >= 1000000) {
-                return '$' + (valor / 1000000).toFixed(0) + 'M';
+                return '$' + Math.round(valor / 1000000) + 'M';
             } else if (valor >= 1000) {
-                return '$' + (valor / 1000).toFixed(0) + 'K';
+                return '$' + Math.round(valor / 1000) + 'K';
             }
             return formatCurrency(valor);
         }
 
-        // Formato compacto para etiquetas de barras (ej: $8.5M)
+        // Formato compacto para etiquetas de barras (ej: $8M)
         function formatCompacto(valor) {
             if (valor === 0) return '';
             if (valor >= 1000000000) {
-                return '$' + (valor / 1000000000).toFixed(1) + 'B';
+                return '$' + (valor / 1000000000).toFixed(2) + 'B';
             } else if (valor >= 1000000) {
-                const millones = valor / 1000000;
-                return '$' + (millones >= 10 ? millones.toFixed(0) : millones.toFixed(1)) + 'M';
+                return '$' + (valor / 1000000).toFixed(2) + 'M';
             } else if (valor >= 1000) {
-                return '$' + (valor / 1000).toFixed(0) + 'K';
+                return '$' + (valor / 1000).toFixed(2) + 'K';
             }
             return '$' + Math.round(valor);
         }
@@ -3815,6 +5111,11 @@
             aplicarYRenderizar();
         }
 
+        function cambiarHorizonteCritico(dias) {
+            horizonteCritico = parseInt(dias);
+            aplicarYRenderizar();
+        }
+
         function actualizarFiltro(tipo, valor) {
             filtros[tipo] = valor;
 
@@ -3975,8 +5276,15 @@
                 updateProgress(40, 'Cargando facturas...');
                 facturas = await fetchPaginated('/v1/invoices', 100);
 
-                updateProgress(75, 'Cargando notas crédito...');
+                updateProgress(70, 'Cargando notas crédito...');
                 notasCredito = await fetchPaginated('/v1/credit-notes', 100);
+
+                updateProgress(85, 'Cargando recibos de caja (pagos)...');
+                vouchers = await fetchPaginated('/v1/vouchers', 100);
+
+                // Construir índice de pagos por factura
+                updateProgress(95, 'Procesando pagos...');
+                pagosPorFactura = construirIndicePagos(vouchers);
 
                 facturasProcessed = procesarDatos();
 
