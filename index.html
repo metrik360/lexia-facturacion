@@ -7640,6 +7640,10 @@
                 const ultimos4Anios = [anioActual - 3, anioActual - 2, anioActual - 1, anioActual];
                 const ventasPorMesAnio = calcularVentasMensuales();
 
+                // Mes de análisis para filtro YTD (Year-To-Date)
+                const mesAnalisisPDF = filtros.cierreMes ? parseInt(filtros.cierreMes) : (new Date().getMonth() + 1);
+                const labelMesCorto = MESES_CORTOS[mesAnalisisPDF - 1]; // Ej: "Mar"
+
                 // Calcular ventas YTD para los últimos 4 años
                 const ventasYTD = {};
                 ultimos4Anios.forEach(anio => {
@@ -7676,12 +7680,14 @@
                     totalNumNC += ventasMensualesAnio[m].notasCredito || 0;
                 }
 
-                // === CALCULAR VENTAS POR CLIENTE (últimos 4 años) ===
+                // === CALCULAR VENTAS POR CLIENTE (últimos 4 años, YTD) ===
                 const ventasPorClienteAnio = {};
                 facturas.forEach(f => {
                     if (!f.date) return;
                     const anio = parseInt(f.date.substring(0, 4));
                     if (!ultimos4Anios.includes(anio)) return;
+                    const mesFact = parseInt(f.date.substring(5, 7));
+                    if (mesFact > mesAnalisisPDF) return; // Filtro YTD
 
                     // Aplicar filtro de centro de costos si está activo
                     if (filtros.lineaNegocio) {
@@ -7706,11 +7712,13 @@
                     ventasPorClienteAnio[nit].anios[anio] += totalFactura;
                 });
 
-                // Restar notas crédito por cliente
+                // Restar notas crédito por cliente (YTD)
                 notasCredito.forEach(nc => {
                     if (!nc.date) return;
                     const anio = parseInt(nc.date.substring(0, 4));
                     if (!ultimos4Anios.includes(anio)) return;
+                    const mesNC = parseInt(nc.date.substring(5, 7));
+                    if (mesNC > mesAnalisisPDF) return; // Filtro YTD
 
                     if (filtros.lineaNegocio) {
                         const lineaNC = LINEAS_NEGOCIO[nc.cost_center] || 'Sin asignar';
@@ -7744,12 +7752,14 @@
                     .sort((a, b) => b.totalGeneral - a.totalGeneral)
                     .slice(0, 15); // Top 15 clientes recurrentes
 
-                // === CALCULAR VENTAS POR CENTRO DE COSTOS (últimos 4 años) ===
+                // === CALCULAR VENTAS POR CENTRO DE COSTOS (últimos 4 años, YTD) ===
                 const ventasPorCCAnio = {};
                 facturas.forEach(f => {
                     if (!f.date) return;
                     const anio = parseInt(f.date.substring(0, 4));
                     if (!ultimos4Anios.includes(anio)) return;
+                    const mesFact = parseInt(f.date.substring(5, 7));
+                    if (mesFact > mesAnalisisPDF) return; // Filtro YTD
 
                     // Aplicar filtro de cliente si está activo
                     if (filtros.cliente) {
@@ -7773,11 +7783,13 @@
                     ventasPorCCAnio[cc].anios[anio] += totalFactura;
                 });
 
-                // Restar notas crédito por centro de costos
+                // Restar notas crédito por centro de costos (YTD)
                 notasCredito.forEach(nc => {
                     if (!nc.date) return;
                     const anio = parseInt(nc.date.substring(0, 4));
                     if (!ultimos4Anios.includes(anio)) return;
+                    const mesNC = parseInt(nc.date.substring(5, 7));
+                    if (mesNC > mesAnalisisPDF) return; // Filtro YTD
 
                     if (filtros.cliente) {
                         const nitNC = nc.customer?.identification || '';
@@ -8096,13 +8108,13 @@
                     ${centrosCostosOrdenados.length > 0 ? `
                     <div style="${estiloSeccion} margin-bottom: 12px; page-break-before: always;">
                         <h2 style="font-size: 11px; font-weight: 700; color: #003839; margin: 0 0 6px 0; border-bottom: 2px solid #418D93; padding-bottom: 4px;">
-                            Ventas Netas por Centro de Costos <span style="font-size: 8px; font-weight: 400; color: #64748b;">| Comparativo Anual</span>
+                            Ventas Netas por Centro de Costos <span style="font-size: 8px; font-weight: 400; color: #64748b;">| Acumulado Ene-${labelMesCorto} (YTD)</span>
                         </h2>
                         <table style="width: 100%; border-collapse: collapse; font-size: 7px; ${estiloTabla}">
                             <thead>
                                 <tr style="background: #003839; color: white;">
                                     <th style="padding: 4px; text-align: left; border: 1px solid #003839;">Centro de Costos</th>
-                                    ${ultimos4Anios.map(a => `<th style="padding: 4px; text-align: right; border: 1px solid #003839;">${a}</th>`).join('')}
+                                    ${ultimos4Anios.map(a => `<th style="padding: 4px; text-align: right; border: 1px solid #003839;">Ene-${labelMesCorto} ${a}</th>`).join('')}
                                     <th style="padding: 4px; text-align: right; border: 1px solid #003839; background: #00262a;">Total</th>
                                 </tr>
                             </thead>
@@ -8133,13 +8145,13 @@
                     ${clientesRecurrentes.length > 0 ? `
                     <div style="${estiloSeccion} margin-bottom: 12px;">
                         <h2 style="font-size: 11px; font-weight: 700; color: #003839; margin: 0 0 6px 0; border-bottom: 2px solid #c084fc; padding-bottom: 4px;">
-                            Ventas Netas por Cliente Recurrente <span style="font-size: 8px; font-weight: 400; color: #64748b;">| Clientes con ventas en más de un año (Top 15)</span>
+                            Ventas Netas por Cliente Recurrente <span style="font-size: 8px; font-weight: 400; color: #64748b;">| Acumulado Ene-${labelMesCorto} - Clientes con ventas en más de un año (Top 15)</span>
                         </h2>
                         <table style="width: 100%; border-collapse: collapse; font-size: 7px; ${estiloTabla}">
                             <thead>
                                 <tr style="background: #7c3aed; color: white;">
                                     <th style="padding: 4px; text-align: left; border: 1px solid #7c3aed;">Cliente</th>
-                                    ${ultimos4Anios.map(a => `<th style="padding: 4px; text-align: right; border: 1px solid #7c3aed;">${a}</th>`).join('')}
+                                    ${ultimos4Anios.map(a => `<th style="padding: 4px; text-align: right; border: 1px solid #7c3aed;">Ene-${labelMesCorto} ${a}</th>`).join('')}
                                     <th style="padding: 4px; text-align: right; border: 1px solid #7c3aed; background: #5b21b6;">Total</th>
                                 </tr>
                             </thead>
