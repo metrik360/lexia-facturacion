@@ -33,14 +33,30 @@ export default async function handler(req, res) {
             m.transaccion === 'Nota Crédito' && !m.rc
         );
 
-        // Calcular resumen
-        const conFactura = pendientes.filter(m => m.factura);
-        const sinFacturaConNit = pendientes.filter(m => !m.factura && m.nit);
-        const sinNada = pendientes.filter(m => !m.factura && !m.nit);
+        // Deduplicar por Documento: cuando una fila se duplica para
+        // mapear múltiples facturas, solo el primer registro conserva
+        // el valor. Los duplicados quedan con valor 0 para no inflar totales.
+        const documentosVistos = new Set();
+        let totalDuplicados = 0;
+        const pendientesDedup = pendientes.map(m => {
+            const doc = (m.documento || '').trim();
+            if (doc && documentosVistos.has(doc)) {
+                totalDuplicados++;
+                return { ...m, valorOriginal: m.valor, valor: 0, duplicado: true };
+            }
+            if (doc) documentosVistos.add(doc);
+            return m;
+        });
+
+        // Calcular resumen (con valores deduplicados)
+        const conFactura = pendientesDedup.filter(m => m.factura);
+        const sinFacturaConNit = pendientesDedup.filter(m => !m.factura && m.nit);
+        const sinNada = pendientesDedup.filter(m => !m.factura && !m.nit);
 
         const summary = {
             totalRegistros: movimientos.length,
-            totalPendientes: pendientes.length,
+            totalPendientes: pendientesDedup.length,
+            duplicadosNeutralizados: totalDuplicados,
             conFactura: conFactura.length,
             sinFacturaConNit: sinFacturaConNit.length,
             sinNada: sinNada.length,
@@ -53,7 +69,7 @@ export default async function handler(req, res) {
             success: true,
             source: 'google-sheets',
             lastUpdate: new Date().toISOString(),
-            data: pendientes,
+            data: pendientesDedup,
             summary: summary
         });
 
