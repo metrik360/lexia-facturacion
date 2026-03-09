@@ -7908,9 +7908,12 @@
                 const pdfContent = document.createElement('div');
                 pdfContent.style.cssText = 'width: 720px; padding: 20px; font-family: Inter, -apple-system, sans-serif; background: white; color: #1E1E1E;';
 
-                // Estilos para evitar cortes en tablas
+                // Estilos para paginacion de tablas
+                // Las secciones pequenas (KPIs, graficas) no se dividen; las tablas largas SI pueden fluir entre paginas
                 const estiloSeccion = 'page-break-inside: avoid; break-inside: avoid;';
-                const estiloTabla = 'page-break-inside: avoid; break-inside: avoid;';
+                const estiloSeccionTabla = ''; // Tablas largas: permitir flujo entre paginas
+                const estiloTabla = '';
+                const estiloFila = 'page-break-inside: avoid; break-inside: avoid;'; // Filas individuales no se cortan
 
                 pdfContent.innerHTML = `
                     <!-- ========== PÁGINA 1: RESUMEN Y GRÁFICAS ========== -->
@@ -8112,10 +8115,12 @@
 
                     <!-- ========== TABLA VENTAS POR CENTRO DE COSTOS ========== -->
                     ${centrosCostosOrdenados.length > 0 ? `
-                    <div style="${estiloSeccion} margin-bottom: 12px; page-break-before: always;">
+                    <div style="${estiloSeccionTabla} margin-bottom: 12px; page-break-before: always;">
+                        <div style="page-break-inside: avoid; break-inside: avoid;">
                         <h2 style="font-size: 11px; font-weight: 700; color: #003839; margin: 0 0 6px 0; border-bottom: 2px solid #418D93; padding-bottom: 4px;">
                             Ventas Netas por Centro de Costos <span style="font-size: 8px; font-weight: 400; color: #64748b;">| Acumulado Ene-${labelMesCorto} (YTD)</span>
                         </h2>
+                        </div>
                         <table style="width: 100%; border-collapse: collapse; font-size: 7px; ${estiloTabla}">
                             <thead>
                                 <tr style="background: #003839; color: white;">
@@ -8134,7 +8139,7 @@
                                     const varColor = variacion > 0 ? '#166534' : variacion < 0 ? '#991b1b' : '#9ca3af';
                                     const varIcon = variacion > 0 ? '\u25B2' : variacion < 0 ? '\u25BC' : '\u25CF';
                                     return `
-                                    <tr style="background: ${i % 2 === 0 ? '#f0fdfa' : 'white'};">
+                                    <tr style="${estiloFila} background: ${i % 2 === 0 ? '#f0fdfa' : 'white'};">
                                         <td style="padding: 3px 4px; border: 1px solid #e5e7eb;">${cc.nombre}</td>
                                         ${ultimos4Anios.map(a => `
                                             <td style="padding: 3px 4px; border: 1px solid #e5e7eb; text-align: right; ${cc.anios[a] <= 0 ? 'color: #9ca3af;' : ''}">${cc.anios[a] > 0 ? formatCurrency(cc.anios[a]) : '-'}</td>
@@ -8142,7 +8147,7 @@
                                         <td style="padding: 3px 4px; border: 1px solid #e5e7eb; text-align: center; font-weight: 600; color: ${varColor};">${varIcon} ${variacion !== 0 ? (variacion > 0 ? '+' : '') + variacion.toFixed(1) + '%' : '-'}</td>
                                     </tr>
                                 `}).join('')}
-                                <tr style="background: #003839; color: white; font-weight: 700;">
+                                <tr style="${estiloFila} background: #003839; color: white; font-weight: 700;">
                                     <td style="padding: 4px; border: 1px solid #003839;">TOTAL</td>
                                     ${ultimos4Anios.map(a => {
                                         const totalAnio = centrosCostosOrdenados.reduce((sum, cc) => sum + (cc.anios[a] || 0), 0);
@@ -8163,10 +8168,12 @@
 
                     <!-- ========== TABLA VENTAS POR CLIENTE RECURRENTE ========== -->
                     ${clientesRecurrentes.length > 0 ? `
-                    <div style="${estiloSeccion} margin-bottom: 12px; page-break-before: always;">
+                    <div style="${estiloSeccionTabla} margin-bottom: 12px; page-break-before: always;">
+                        <div style="page-break-inside: avoid; break-inside: avoid;">
                         <h2 style="font-size: 11px; font-weight: 700; color: #003839; margin: 0 0 6px 0; border-bottom: 2px solid #c084fc; padding-bottom: 4px;">
                             Ventas Netas por Cliente Recurrente <span style="font-size: 8px; font-weight: 400; color: #64748b;">| Acumulado Ene-${labelMesCorto} - Clientes con ventas en más de un año (Top 15)</span>
                         </h2>
+                        </div>
                         <table style="width: 100%; border-collapse: collapse; font-size: 7px; ${estiloTabla}">
                             <thead>
                                 <tr style="background: #7c3aed; color: white;">
@@ -8185,7 +8192,7 @@
                                     const varColor = variacion > 0 ? '#166534' : variacion < 0 ? '#991b1b' : '#9ca3af';
                                     const varIcon = variacion > 0 ? '\u25B2' : variacion < 0 ? '\u25BC' : '\u25CF';
                                     return `
-                                    <tr style="background: ${i % 2 === 0 ? '#faf5ff' : 'white'};">
+                                    <tr style="${estiloFila} background: ${i % 2 === 0 ? '#faf5ff' : 'white'};">
                                         <td style="padding: 3px 4px; border: 1px solid #e5e7eb; max-width: 180px; word-wrap: break-word; line-height: 1.3;">${c.nombre}</td>
                                         ${ultimos4Anios.map(a => `
                                             <td style="padding: 3px 4px; border: 1px solid #e5e7eb; text-align: right; ${c.anios[a] <= 0 ? 'color: #9ca3af;' : ''}">${c.anios[a] > 0 ? formatCurrency(c.anios[a]) : '-'}</td>
@@ -8193,7 +8200,7 @@
                                         <td style="padding: 3px 4px; border: 1px solid #e5e7eb; text-align: center; font-weight: 600; color: ${varColor};">${varIcon} ${variacion !== 0 ? (variacion > 0 ? '+' : '') + variacion.toFixed(1) + '%' : '-'}</td>
                                     </tr>
                                 `}).join('')}
-                                <tr style="background: #7c3aed; color: white; font-weight: 700;">
+                                <tr style="${estiloFila} background: #7c3aed; color: white; font-weight: 700;">
                                     <td style="padding: 4px; border: 1px solid #7c3aed;">TOTAL RECURRENTES</td>
                                     ${ultimos4Anios.map(a => {
                                         const totalAnio = clientesRecurrentes.reduce((sum, c) => sum + (c.anios[a] || 0), 0);
@@ -8287,7 +8294,7 @@
                         format: 'letter',
                         orientation: 'portrait'
                     },
-                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                    pagebreak: { mode: ['css', 'legacy'] }
                 };
 
                 await html2pdf().set(opt).from(pdfContent).save();
