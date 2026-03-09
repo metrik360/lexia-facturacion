@@ -7989,14 +7989,15 @@
                                     <div style="display: flex; justify-content: space-around; height: 100px; align-items: flex-end;">
                                         ${MESES.map((mes, i) => {
                                             const mesNum = i + 1;
+                                            const valorActual = ventasPorMesAnio[ultimos4Anios[3]]?.[mesNum]?.neto || 0;
                                             return `
                                                 <div style="display: flex; flex-direction: column; align-items: center;">
+                                                    <div style="font-size: 5px; color: #003839; font-weight: 700; margin-bottom: 1px; white-space: nowrap;">${valorActual > 0 ? formatMillones(valorActual) : ''}</div>
                                                     <div style="display: flex; align-items: flex-end; gap: 1px;">
                                                         ${ultimos4Anios.map(anio => {
                                                             const valor = ventasPorMesAnio[anio]?.[mesNum]?.neto || 0;
                                                             const altura = maxVentaMensual > 0 ? Math.max((valor / maxVentaMensual) * 85, valor > 0 ? 2 : 0) : 0;
-                                                            const labelColor = anio === ultimos4Anios[3] || anio === ultimos4Anios[2] ? '#fff' : '#1e293b';
-                                                            return `<div style="width: 8px; height: ${altura}px; background: ${coloresAnios[anio]}; border-radius: 1px 1px 0 0; position: relative;">${valor > 0 && altura >= 12 ? `<span style="position: absolute; top: 1px; left: 50%; transform: translateX(-50%) rotate(-90deg); font-size: 4px; color: ${labelColor}; white-space: nowrap; font-weight: 600;">${formatMillones(valor)}</span>` : ''}</div>`;
+                                                            return `<div style="width: 8px; height: ${altura}px; background: ${coloresAnios[anio]}; border-radius: 1px 1px 0 0;"></div>`;
                                                         }).join('')}
                                                     </div>
                                                     <div style="font-size: 6px; color: #64748b; margin-top: 2px;">${MESES_CORTOS[i]}</div>
@@ -8038,14 +8039,15 @@
                                     <div style="display: flex; justify-content: space-around; height: 100px; align-items: flex-end;">
                                         ${MESES.map((mes, i) => {
                                             const mesNum = i + 1;
+                                            const valorActual = ventasYTD[ultimos4Anios[3]]?.[mesNum] || 0;
                                             return `
                                                 <div style="display: flex; flex-direction: column; align-items: center;">
+                                                    <div style="font-size: 5px; color: #003839; font-weight: 700; margin-bottom: 1px; white-space: nowrap;">${valorActual > 0 ? formatMillones(valorActual) : ''}</div>
                                                     <div style="display: flex; align-items: flex-end; gap: 1px;">
                                                         ${ultimos4Anios.map(anio => {
                                                             const valor = ventasYTD[anio]?.[mesNum] || 0;
                                                             const altura = maxVentaAcumulada > 0 ? Math.max((valor / maxVentaAcumulada) * 85, valor > 0 ? 2 : 0) : 0;
-                                                            const labelColor = anio === ultimos4Anios[3] || anio === ultimos4Anios[2] ? '#fff' : '#1e293b';
-                                                            return `<div style="width: 8px; height: ${altura}px; background: ${coloresAnios[anio]}; border-radius: 1px 1px 0 0; position: relative;">${valor > 0 && altura >= 12 ? `<span style="position: absolute; top: 1px; left: 50%; transform: translateX(-50%) rotate(-90deg); font-size: 4px; color: ${labelColor}; white-space: nowrap; font-weight: 600;">${formatMillones(valor)}</span>` : ''}</div>`;
+                                                            return `<div style="width: 8px; height: ${altura}px; background: ${coloresAnios[anio]}; border-radius: 1px 1px 0 0;"></div>`;
                                                         }).join('')}
                                                     </div>
                                                     <div style="font-size: 6px; color: #64748b; margin-top: 2px;">${MESES_CORTOS[i]}</div>
