@@ -7635,9 +7635,9 @@
                     hour: '2-digit', minute: '2-digit', second: '2-digit'
                 });
 
-                // === CALCULAR DATOS PARA GRÁFICAS (últimos 4 años) ===
-                const anioActual = new Date().getFullYear();
-                const ultimos4Anios = [anioActual - 3, anioActual - 2, anioActual - 1, anioActual];
+                // === CALCULAR DATOS PARA GRÁFICAS (últimos 4 años respecto al año seleccionado) ===
+                const anioBase = parseInt(anioAnalisis);
+                const ultimos4Anios = [anioBase - 3, anioBase - 2, anioBase - 1, anioBase];
                 const ventasPorMesAnio = calcularVentasMensuales();
 
                 // Mes de análisis para filtro YTD (Year-To-Date)
