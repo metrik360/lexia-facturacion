@@ -1,5 +1,13 @@
 {
   "version": 2,
+  "headers": [
+    {
+      "source": "/(.*).html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+      ]
+    }
+  ],
   "routes": [
     { "src": "/lexia/api/(.*)", "dest": "/api/$1" },
     { "src": "/lexia/assets/(.*)", "dest": "/assets/$1" },

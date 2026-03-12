@@ -1,7 +1,7 @@
 ---
 doc_id: PROJECT_LOG
-version: 1.0
-updated: 2026-03-03
+version: 1.3
+updated: 2026-03-11
 ---
 
 # PROJECT LOG - Dashboard de Cartera Lexia
@@ -65,10 +65,74 @@ updated: 2026-03-03
 
 ---
 
-## SPRINT 2 — NO INICIADO
+## SPRINT 2 — MEJORAS PDF (EN PROGRESO)
 
-Sin requirements definidos.
+**Periodo:** 03/03/2026 - presente
+**Objetivo:** Mejorar reporte PDF con indicadores comparativos y visualizacion
+
+### Commits
+
+| Fecha | Commit | Descripcion |
+|-------|--------|-------------|
+| 03/03/2026 | `8abaf4e` | Normalizar documentacion Sprint 1 + trackear archivos faltantes |
+| 03/03/2026 | `2c13f88` | Filtro YTD en tablas PDF de ventas por CC y cliente recurrente |
+| 03/03/2026 | `3cf52d8` | Ocultar Cartera Real y tabla CxC del PDF por solicitud del cliente |
+| 04/03/2026 | `2077491` | Deduplicar movimientos bancarios por columna Documento |
+| 06/03/2026 | `dbee676` | Page break en tabla Clientes Recurrentes del PDF |
+| 09/03/2026 | `c34a048` | Variacion % en tablas PDF + degradado y etiquetas en graficas |
+| 09/03/2026 | `941adf5` | Fix: permitir que tablas PDF derramen entre paginas en vez de cortarse |
+
+### Decisiones tecnicas
+
+1. **Variacion %:** Compara ultimo año vs anterior. Formula: `((act - ant) / ant) * 100`
+   - Icono tendencia: triangulo verde (sube), rojo (baja), punto gris (neutro)
+   - Reemplaza columna "Total" que no aportaba insight comparativo
+2. **Degradado barras:** Paleta teal monotona (claro=antiguo, oscuro=reciente)
+   - Razon: mejor lectura visual que colores arbitrarios
+3. **Etiquetas en barras:** Valor rotado 90° dentro de la barra, solo si altura >= 12px
+   - Razon: evitar clutter en barras pequenas
+
+### Problemas resueltos
+
+| Problema | Solucion | Fecha |
+|----------|----------|-------|
+| Tablas PDF se cortaban si excedian una pagina | Eliminar page-break-inside:avoid de secciones de tabla, cambiar html2pdf de avoid-all a css+legacy, proteger filas individuales | 09/03/2026 |
+
+### Notas
+
+- Cartera Real y tabla CxC siguen ocultas en el PDF (codigo comentado, reactivable)
+- Movimientos bancarios se deduplican por campo "documento" para evitar inflar totales
 
 ---
 
-*Ultima actualizacion: 03/03/2026*
+## SPRINT 3 — INFRAESTRUCTURA (CERRADO)
+
+**Periodo:** 11/03/2026
+**Objetivo:** Migrar dominio a Vercel team metrik-one y fix de PDF para anos anteriores
+
+### Cambios
+
+| Fecha | Descripcion |
+|-------|-------------|
+| 11/03/2026 | Fix: mesAnalisisPDF usa 12 para anos pasados (ano completo en vez de mes actual) |
+| 11/03/2026 | Fix: cambiarAnioAnalisis() pone cierreMes='12' para anos anteriores al actual |
+| 11/03/2026 | Cache headers en vercel.json (no-cache para index.html) |
+| 11/03/2026 | Migrado dominio lexia.metrik.com.co de cuenta personal a team metrik-one |
+| 11/03/2026 | Limpieza: eliminado proyecto viejo dashboard-pi-snowy-93 de cuenta personal |
+
+### Decisiones
+
+1. **Dominios centralizados en metrik-one:** Todos los dominios de proyectos en el team, cuenta personal limpia
+2. **metrik.com.co sigue en GitHub Pages:** No afectado por migracion Vercel
+3. **Cache-busting:** Headers no-cache en vercel.json para HTML, evita versiones viejas en browser
+
+### Problemas resueltos
+
+| Problema | Solucion | Fecha |
+|----------|----------|-------|
+| lexia.metrik.com.co servia proyecto viejo | Dominio apuntaba a dashboard-pi-snowy-93 en cuenta personal. Eliminado de cuenta vieja, agregado a lexia-facturacion en metrik-one | 11/03/2026 |
+| PDF mostraba anos futuros al seleccionar ano anterior | mesAnalisisPDF usaba mes actual en vez de 12 para anos pasados. Fix: detectar si anioBase < anioActual y usar 12 | 11/03/2026 |
+
+---
+
+*Ultima actualizacion: 11/03/2026*

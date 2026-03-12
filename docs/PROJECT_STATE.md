@@ -1,7 +1,7 @@
 ---
 doc_id: PROJECT_STATE
-version: 2.0
-updated: 2026-03-03
+version: 2.2
+updated: 2026-03-11
 ---
 
 # PROJECT STATE - Dashboard de Cartera Lexia
@@ -41,6 +41,34 @@ updated: 2026-03-03
 - Tabla de facturas problematicas (>60 dias)
 - Filtros por fecha, cliente, horizonte, linea de negocio
 - Responsive (desktop + tablet)
+
+---
+
+## SPRINT 2 — MEJORAS PDF (CERRADO)
+
+**Entregado:**
+- Exportar PDF con analisis de ventas, graficas comparativas y tablas
+- Filtro YTD en tablas PDF (ventas por CC y cliente recurrente)
+- Ocultar Cartera Real y tabla CxC del PDF (solicitud del cliente)
+- Deduplicacion de movimientos bancarios por columna Documento
+- Page break en tabla Clientes Recurrentes del PDF
+- Columna "Total" reemplazada por "Var %" en tablas CC y Clientes Recurrentes
+- Graficas de barras con degradado teal (claro=antiguo, oscuro=reciente)
+- Etiquetas de valor dentro de cada barra en graficas PDF
+- Fix: anos del PDF anclados al ano seleccionado (no al actual)
+- Fix: mesAnalisisPDF usa 12 para anos pasados (ano completo)
+
+---
+
+## SPRINT 3 — INFRAESTRUCTURA (CERRADO)
+
+**Entregado:**
+- Migracion de dominio lexia.metrik.com.co a team metrik-one en Vercel
+- Cache headers en vercel.json para evitar versiones cacheadas
+- Limpieza de cuenta personal Vercel (proyecto viejo dashboard-pi-snowy-93)
+
+**Pendiente:**
+- Migrar repo de metrik360 a bi-metrik en GitHub
 
 ---
 
@@ -92,4 +120,4 @@ updated: 2026-03-03
 
 ---
 
-*Ultima actualizacion: 03/03/2026*
+*Ultima actualizacion: 11/03/2026*

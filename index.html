@@ -6619,8 +6619,11 @@
         function cambiarAnioAnalisis(nuevoAnio) {
             anioAnalisis = parseInt(nuevoAnio);
             // Resetear filtros de mes y cliente
+            // Para años anteriores al actual, usar diciembre (año completo)
             filtros.cierreAnio = String(anioAnalisis);
-            filtros.cierreMes = String(new Date().getMonth() + 1);
+            filtros.cierreMes = anioAnalisis < new Date().getFullYear()
+                ? '12'
+                : String(new Date().getMonth() + 1);
             filtros.clienteConciliacion = '';  // Resetear cliente seleccionado
             const kpis = calcularKPIs(aplicarFiltros(facturasProcessed));
             const opciones = obtenerOpcionesFiltros(facturasProcessed);
@@ -7641,8 +7644,12 @@
                 const ventasPorMesAnio = calcularVentasMensuales();
 
                 // Mes de análisis para filtro YTD (Year-To-Date)
-                const mesAnalisisPDF = filtros.cierreMes ? parseInt(filtros.cierreMes) : (new Date().getMonth() + 1);
-                const labelMesCorto = MESES_CORTOS[mesAnalisisPDF - 1]; // Ej: "Mar"
+                // Para años anteriores al actual, usar diciembre (año completo)
+                const anioActualReal = new Date().getFullYear();
+                const mesAnalisisPDF = anioBase < anioActualReal
+                    ? 12
+                    : (filtros.cierreMes ? parseInt(filtros.cierreMes) : (new Date().getMonth() + 1));
+                const labelMesCorto = MESES_CORTOS[mesAnalisisPDF - 1]; // Ej: "Mar" o "Dic"
 
                 // Calcular ventas YTD para los últimos 4 años
                 const ventasYTD = {};
