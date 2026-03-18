@@ -3879,7 +3879,7 @@
 
                 docs.sort((a, b) => b.fecha.localeCompare(a.fecha));
 
-                const totalFacturasAnio = docs.reduce((sum, f) => sum + f.valorBase, 0);
+                const totalFacturasAnio = docs.reduce((sum, f) => sum + f.total, 0);
                 const totalNCAnio = docs.reduce((sum, f) => sum + f.totalNC, 0);
                 const totalPagadoAnio = docs.reduce((sum, f) => sum + f.totalPagadoRC, 0);
                 const totalCEAnio = docs.reduce((sum, f) => sum + (f.totalCE || 0), 0);
@@ -4355,7 +4355,7 @@
                 // Ordenar por fecha descendente
                 docs.sort((a, b) => b.fecha.localeCompare(a.fecha));
 
-                const totalFacturasAnio = docs.reduce((sum, f) => sum + f.valorBase, 0);
+                const totalFacturasAnio = docs.reduce((sum, f) => sum + f.total, 0);
                 const totalNCAnio = docs.reduce((sum, f) => sum + f.totalNC, 0);
                 const totalPagadoAnio = docs.reduce((sum, f) => sum + (f.totalPagadoRC || 0), 0);
                 const totalMRAnio = docs.reduce((sum, f) => sum + (f.totalMR || 0), 0);
