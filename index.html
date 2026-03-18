@@ -7865,11 +7865,18 @@
                 if (filtros.lineaNegocio) {
                     filtrosAplicados.push(`Centro de Costos: ${filtros.lineaNegocio}`);
                 }
-                filtrosAplicados.push(`Año: ${anioAnalisis}`);
+                // Determinar periodo de análisis
+                const mesCorteLabel = filtros.cierreMes
+                    ? MESES[parseInt(filtros.cierreMes) - 1]
+                    : null;
+                const periodoLabel = mesCorteLabel
+                    ? `Enero - ${mesCorteLabel} ${anioAnalisis}`
+                    : `Año completo ${anioAnalisis}`;
+                filtrosAplicados.push(periodoLabel);
 
                 const tituloFiltros = filtrosAplicados.length > 1
                     ? filtrosAplicados.join(' | ')
-                    : `Todos los datos - Año ${anioAnalisis}`;
+                    : `Todos los datos - ${periodoLabel}`;
 
                 // === FECHA Y HORA DE GENERACIÓN ===
                 const ahora = new Date();
@@ -7919,10 +7926,10 @@
                 const facturasFiltradas = aplicarFiltros(facturasProcessed);
                 const kpis = calcularKPIs(facturasFiltradas);
 
-                // === CALCULAR DATOS DEL AÑO SELECCIONADO ===
+                // === CALCULAR DATOS DEL PERIODO SELECCIONADO (hasta mesAnalisisPDF) ===
                 const ventasMensualesAnio = calcularVentasMensualesConciliacion();
                 let totalVentasAnual = 0, totalNCAnual = 0, totalNumFacturas = 0, totalNumNC = 0;
-                for (let m = 1; m <= 12; m++) {
+                for (let m = 1; m <= mesAnalisisPDF; m++) {
                     totalVentasAnual += ventasMensualesAnio[m].ventas;
                     totalNCAnual += ventasMensualesAnio[m].nc;
                     totalNumFacturas += ventasMensualesAnio[m].facturas || 0;
@@ -8171,7 +8178,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 3px solid #418D93; margin-bottom: 12px;">
                             <img src="${LOGO_URL}" style="height: 40px;" crossorigin="anonymous">
                             <div style="text-align: right; flex: 1; margin-left: 20px;">
-                                <h1 style="font-size: 18px; font-weight: 700; color: #003839; margin: 0;">Informe de Análisis de Ventas</h1>
+                                <h1 style="font-size: 18px; font-weight: 700; color: #003839; margin: 0;">Informe de Analisis de Ventas ${mesAnalisisPDF < 12 ? '| Corte: ' + MESES[mesAnalisisPDF - 1] + ' ' + anioAnalisis : '| Ano ' + anioAnalisis}</h1>
                                 <p style="font-size: 10px; color: #418D93; margin: 3px 0 0 0; font-weight: 600;">${tituloFiltros}</p>
                             </div>
                         </div>
@@ -8187,15 +8194,15 @@
                         <!-- TARJETAS KPIs PRINCIPALES -->
                         <div style="display: flex; gap: 8px; margin-bottom: 8px;">
                             <div style="flex: 1; background: linear-gradient(135deg, #f0fdf4, #dcfce7); padding: 10px; border-radius: 6px; border: 1px solid #86efac;">
-                                <div style="font-size: 9px; font-weight: 600; color: #166534; margin-bottom: 2px;">Ventas Brutas ${anioAnalisis}</div>
+                                <div style="font-size: 9px; font-weight: 600; color: #166534; margin-bottom: 2px;">Ventas Brutas ${mesAnalisisPDF < 12 ? 'Ene-' + labelMesCorto + ' ' : ''}${anioAnalisis}</div>
                                 <div style="font-size: 14px; font-weight: 700; color: #166534;">${formatCurrency(totalVentasAnual)}</div>
                             </div>
                             <div style="flex: 1; background: linear-gradient(135deg, #fef2f2, #fecaca); padding: 10px; border-radius: 6px; border: 1px solid #fca5a5;">
-                                <div style="font-size: 9px; font-weight: 600; color: #991b1b; margin-bottom: 2px;">Notas Crédito ${anioAnalisis}</div>
+                                <div style="font-size: 9px; font-weight: 600; color: #991b1b; margin-bottom: 2px;">Notas Credito ${mesAnalisisPDF < 12 ? 'Ene-' + labelMesCorto + ' ' : ''}${anioAnalisis}</div>
                                 <div style="font-size: 14px; font-weight: 700; color: #991b1b;">-${formatCurrency(totalNCAnual)}</div>
                             </div>
                             <div style="flex: 1; background: linear-gradient(135deg, #eff6ff, #bfdbfe); padding: 10px; border-radius: 6px; border: 1px solid #93c5fd;">
-                                <div style="font-size: 9px; font-weight: 600; color: #1e40af; margin-bottom: 2px;">Ventas Netas ${anioAnalisis}</div>
+                                <div style="font-size: 9px; font-weight: 600; color: #1e40af; margin-bottom: 2px;">Ventas Netas ${mesAnalisisPDF < 12 ? 'Ene-' + labelMesCorto + ' ' : ''}${anioAnalisis}</div>
                                 <div style="font-size: 14px; font-weight: 700; color: #1e40af;">${formatCurrency(totalVentasAnual - totalNCAnual)}</div>
                             </div>
                             <!-- OCULTO TEMPORALMENTE POR SOLICITUD DEL CLIENTE
@@ -8209,11 +8216,11 @@
                         <!-- TARJETAS CANTIDAD DOCUMENTOS -->
                         <div style="display: flex; gap: 8px; margin-bottom: 14px;">
                             <div style="flex: 1; background: linear-gradient(135deg, #faf5ff, #e9d5ff); padding: 8px 10px; border-radius: 6px; border: 1px solid #c084fc;">
-                                <div style="font-size: 9px; font-weight: 600; color: #7c3aed; margin-bottom: 2px;"># Facturas ${anioAnalisis}</div>
+                                <div style="font-size: 9px; font-weight: 600; color: #7c3aed; margin-bottom: 2px;"># Facturas ${mesAnalisisPDF < 12 ? 'Ene-' + labelMesCorto + ' ' : ''}${anioAnalisis}</div>
                                 <div style="font-size: 16px; font-weight: 700; color: #7c3aed;">${totalNumFacturas.toLocaleString('es-CO')}</div>
                             </div>
                             <div style="flex: 1; background: linear-gradient(135deg, #fff7ed, #fed7aa); padding: 8px 10px; border-radius: 6px; border: 1px solid #fb923c;">
-                                <div style="font-size: 9px; font-weight: 600; color: #c2410c; margin-bottom: 2px;"># Notas Crédito ${anioAnalisis}</div>
+                                <div style="font-size: 9px; font-weight: 600; color: #c2410c; margin-bottom: 2px;"># Notas Credito ${mesAnalisisPDF < 12 ? 'Ene-' + labelMesCorto + ' ' : ''}${anioAnalisis}</div>
                                 <div style="font-size: 16px; font-weight: 700; color: #c2410c;">${totalNumNC.toLocaleString('es-CO')}</div>
                             </div>
                             <div style="flex: 2;"></div>
@@ -8513,10 +8520,10 @@
                     ` : ''}
 
                     <!-- ========== FOOTER ========== -->
-                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #e5e7eb;">
+                    <div style="margin-top: 15px; padding-top: 10px; padding-bottom: 20px; border-top: 1px solid #e5e7eb; page-break-inside: avoid; break-inside: avoid;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div style="font-size: 7px; color: #9ca3af;">
-                                Lexia Abogados S.A.S. | Dashboard de Facturación | Generado: ${fechaGeneracion}
+                                Lexia Abogados S.A.S. | Dashboard de Facturacion | Generado: ${fechaGeneracion}
                             </div>
                             <div style="display: flex; align-items: center; gap: 4px;">
                                 <span style="font-size: 7px; color: #9ca3af;">Powered by</span>
@@ -8524,14 +8531,16 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Spacer para evitar corte en la última página -->
+                    <div style="height: 30px;"></div>
                 `;
 
                 document.body.appendChild(pdfContent);
 
                 // Configuración de html2pdf
                 const opt = {
-                    margin: [8, 10, 8, 10],
-                    filename: `Lexia_Analisis_${anioAnalisis}${filtros.cliente ? '_' + filtros.cliente : ''}${filtros.lineaNegocio ? '_' + filtros.lineaNegocio.replace(/\s/g, '') : ''}.pdf`,
+                    margin: [8, 10, 15, 10],
+                    filename: `Lexia_Analisis_${anioAnalisis}${mesAnalisisPDF < 12 ? '_Corte' + labelMesCorto : ''}${filtros.cliente ? '_' + filtros.cliente : ''}${filtros.lineaNegocio ? '_' + filtros.lineaNegocio.replace(/\s/g, '') : ''}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
                         scale: 2,
