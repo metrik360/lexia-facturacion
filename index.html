@@ -2240,12 +2240,24 @@
             return null;
         }
 
-        // Buscar factura en SIIGO por número
+        // Buscar factura en SIIGO por número (en facturas procesadas con balance > 0)
         function buscarFacturaPorNumero(numFactura) {
             return facturasProcessed.find(f => {
                 const numSolo = f.numero.replace(/[^0-9]/g, '');
                 return numSolo === String(numFactura) ||
                        f.numero.includes(String(numFactura));
+            });
+        }
+
+        // Buscar factura en datos CRUDOS de SIIGO (incluye balance = 0)
+        // Retorna true si la factura existe y tiene balance = 0
+        function facturaYaCerradaEnSiigo(numFactura) {
+            return facturas.some(f => {
+                const numero = `${f.prefix}-${f.number}`;
+                const numSolo = String(f.number);
+                const coincide = numSolo === String(numFactura) ||
+                                 numero.includes(String(numFactura));
+                return coincide && f.balance <= 0;
             });
         }
 
@@ -2255,12 +2267,23 @@
             movimientosSinIdentificar = [];
             movimientosEnLimbo = [];
             alertasNIT = [];
+            let movimientosDescartados = 0; // Facturas ya cerradas en SIIGO
 
             movimientos.forEach(mov => {
                 const tieneFacturas = mov.facturas && mov.facturas.length > 0;
                 const tieneNIT = mov.nit && mov.nit.length > 5;
 
                 if (tieneFacturas) {
+                    // Verificar si TODAS las facturas referenciadas ya tienen balance 0 en SIIGO.
+                    // Si es así, el contador ya registró el pago con otro documento (CE, ajuste, etc.)
+                    // y no debemos contabilizar este movimiento para evitar doble conteo.
+                    const todasCerradas = mov.facturas.every(numFac => facturaYaCerradaEnSiigo(numFac));
+                    if (todasCerradas) {
+                        movimientosDescartados++;
+                        console.log(`Movimiento descartado (factura(s) ya cerrada en SIIGO): Doc ${mov.documento}, Facturas: ${mov.facturas.join(',')}, Valor: ${mov.valor}`);
+                        return; // Saltar este movimiento
+                    }
+
                     // CASO A: Tiene número de factura - cruce directo
                     const facturasEncontradas = [];
                     const facturasNoEncontradas = [];
@@ -2329,10 +2352,14 @@
                 cantidadConFactura: movimientosConFactura.length,
                 cantidadSinIdentificar: movimientosSinIdentificar.length,
                 cantidadEnLimbo: movimientosEnLimbo.length,
-                cantidadAlertas: alertasNIT.length
+                cantidadAlertas: alertasNIT.length,
+                descartadosPorSiigo: movimientosDescartados
             };
 
             console.log('Resumen movimientos:', resumenMovimientos);
+            if (movimientosDescartados > 0) {
+                console.log(`${movimientosDescartados} movimiento(s) descartados: facturas ya cerradas en SIIGO por documento contable`);
+            }
             console.log('Alertas NIT:', alertasNIT);
         }
 
@@ -3575,7 +3602,10 @@
 
                 const movimientosMR = mrPorFactura[f.number] || [];
 
-                const totalPagadoRC = pagosFactura.filter(p => p.movimiento === 'Credit').reduce((sum, p) => sum + p.valor, 0);
+                const pagosRC = pagosFactura.filter(p => p.movimiento === 'Credit');
+                const comprobantesCE = pagosFactura.filter(p => p.movimiento !== 'Credit');
+                const totalPagadoRC = pagosRC.reduce((sum, p) => sum + p.valor, 0);
+                const totalCE = comprobantesCE.reduce((sum, p) => sum + p.valor, 0);
                 const totalNC = notasCreditoFactura.reduce((sum, nc) => sum + nc.total, 0);
                 const totalMR = movimientosMR.reduce((sum, mr) => sum + mr.valor, 0);
                 // Convertir balance a COP
@@ -3588,7 +3618,7 @@
                 let estado = 'pendiente';
                 if (totalNC >= totalFacturaCOP * 0.99) {
                     estado = 'anulada';
-                } else if (saldoAjustado === 0 && (totalPagadoRC > 0 || totalMR > 0)) {
+                } else if (saldoAjustado === 0 && (totalPagadoRC > 0 || totalMR > 0 || totalCE > 0)) {
                     estado = 'pagada';
                 } else if (saldoAjustado === 0) {
                     estado = 'saldada';
@@ -3607,10 +3637,12 @@
                     saldo: saldoAjustado,
                     estado: estado,
                     notasCredito: notasCreditoFactura,
-                    pagos: pagosFactura.filter(p => p.movimiento === 'Credit'),
+                    pagos: pagosRC,
+                    comprobantesEgreso: comprobantesCE,
                     movimientosMR: movimientosMR,
                     totalNC: totalNC,
                     totalPagadoRC: totalPagadoRC,
+                    totalCE: totalCE,
                     totalMR: totalMR
                 });
             });
@@ -3646,6 +3678,7 @@
                 const totalFacturasAnio = docs.reduce((sum, f) => sum + f.valorBase, 0);
                 const totalNCAnio = docs.reduce((sum, f) => sum + f.totalNC, 0);
                 const totalPagadoAnio = docs.reduce((sum, f) => sum + f.totalPagadoRC, 0);
+                const totalCEAnio = docs.reduce((sum, f) => sum + (f.totalCE || 0), 0);
                 const totalMRAnio = docs.reduce((sum, f) => sum + f.totalMR, 0);
                 const saldoAnio = docs.reduce((sum, f) => sum + f.saldo, 0);
                 const netoAnio = totalFacturasAnio - totalNCAnio;
@@ -3679,7 +3712,8 @@
                             <th style="min-width: 180px;">Concepto</th>
                             <th style="text-align: right; width: 100px;">Total</th>
                             <th style="text-align: right; width: 90px;">N. Crédito</th>
-                            <th style="text-align: right; width: 90px;">Pagado</th>
+                            <th style="text-align: right; width: 90px;">Pagado RC</th>
+                            <th style="text-align: right; width: 90px; color: #7c3aed;">CE</th>
                             <th style="text-align: right; width: 90px; color: #1971c2;">MR</th>
                             <th style="text-align: right; width: 100px;">Saldo</th>
                         </tr>
@@ -3687,7 +3721,7 @@
                     <tbody>`;
 
                 docs.forEach((f, idx) => {
-                    const tieneDetalle = f.notasCredito.length > 0 || f.pagos.length > 0 || (f.movimientosMR && f.movimientosMR.length > 0);
+                    const tieneDetalle = f.notasCredito.length > 0 || f.pagos.length > 0 || (f.comprobantesEgreso && f.comprobantesEgreso.length > 0) || (f.movimientosMR && f.movimientosMR.length > 0);
                     const rowId = `detalle-todos-${anio}-${idx}`;
 
                     let estadoBadge = '';
@@ -3726,6 +3760,7 @@
                             <td style="text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(f.total)}</td>
                             <td style="text-align: right; font-variant-numeric: tabular-nums; color: var(--teal-principal);">${f.totalNC > 0 ? formatCurrency(f.totalNC) : '-'}</td>
                             <td style="text-align: right; font-variant-numeric: tabular-nums; color: var(--verde-vibrante);">${f.totalPagadoRC > 0 ? formatCurrency(f.totalPagadoRC) : '-'}</td>
+                            <td style="text-align: right; font-variant-numeric: tabular-nums; color: #7c3aed;">${f.totalCE > 0 ? formatCurrency(f.totalCE) : '-'}</td>
                             <td style="text-align: right; font-variant-numeric: tabular-nums; color: #1971c2;">${f.totalMR > 0 ? formatCurrency(f.totalMR) : '-'}</td>
                             <td style="text-align: right; font-variant-numeric: tabular-nums; ${saldoClass}">${formatCurrency(f.saldo)}</td>
                         </tr>
@@ -3733,16 +3768,16 @@
 
                     if (tieneDetalle) {
                         html += `<tr class="detalle-subrow-container" id="subrow-${rowId}" style="display: none;">
-                            <td colspan="9" style="padding: 0; background: #f8f9fa;">
+                            <td colspan="10" style="padding: 0; background: #f8f9fa;">
                                 <table style="width: 100%; margin: 0;"><tbody>`;
 
                         f.notasCredito.forEach(nc => {
                             html += `<tr class="pago-subrow">
                                 <td style="padding-left: 40px; color: var(--teal-principal); font-size: 12px;">↳ ${nc.numero}</td>
                                 <td style="font-size: 12px;">${formatDate(nc.fecha)}</td>
-                                <td colspan="2" style="font-size: 11px; color: var(--gris-medio);">Nota Crédito</td>
+                                <td colspan="2" style="font-size: 11px; color: var(--gris-medio);">Nota Credito</td>
                                 <td style="text-align: right; font-size: 12px; color: var(--teal-principal);">-${formatCurrency(nc.total)}</td>
-                                <td colspan="4"></td>
+                                <td colspan="5"></td>
                             </tr>`;
                         });
 
@@ -3754,6 +3789,22 @@
                                 <td></td>
                                 <td></td>
                                 <td style="text-align: right; font-size: 12px; color: var(--verde-vibrante);">${formatCurrency(p.valor)}</td>
+                                <td colspan="3"></td>
+                            </tr>`;
+                        });
+
+                        (f.comprobantesEgreso || []).forEach(ce => {
+                            html += `<tr class="pago-subrow" style="background: #f3f0ff;">
+                                <td style="padding-left: 40px; color: #7c3aed; font-size: 12px;">↳ ${ce.voucherNumero}</td>
+                                <td style="font-size: 12px;">${formatDate(ce.voucherFecha)}</td>
+                                <td colspan="2" style="font-size: 11px; color: #7c3aed;">
+                                    <span style="background: #7c3aed; color: white; font-size: 9px; padding: 2px 6px; border-radius: 3px;">COMP. EGRESO</span>
+                                    ${ce.descripcion ? `<span style="margin-left: 4px; color: var(--gris-medio);">${ce.descripcion.substring(0, 30)}</span>` : ''}
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td style="text-align: right; font-size: 12px; color: #7c3aed; font-weight: 600;">${formatCurrency(ce.valor)}</td>
                                 <td colspan="2"></td>
                             </tr>`;
                         });
@@ -3765,7 +3816,7 @@
                                 <td colspan="2" style="font-size: 11px; color: #1971c2;">
                                     <span style="background: #1971c2; color: white; font-size: 9px; padding: 2px 6px; border-radius: 3px;">PEND. SIIGO</span>
                                 </td>
-                                <td colspan="3"></td>
+                                <td colspan="4"></td>
                                 <td style="text-align: right; font-size: 12px; color: #1971c2; font-weight: 600;">${formatCurrency(mr.valor)}</td>
                                 <td></td>
                             </tr>`;
@@ -3780,6 +3831,7 @@
                     <td style="text-align: right;">${formatCurrency(docs.reduce((s, f) => s + f.total, 0))}</td>
                     <td style="text-align: right; color: var(--teal-principal);">${formatCurrency(totalNCAnio)}</td>
                     <td style="text-align: right; color: var(--verde-vibrante);">${formatCurrency(totalPagadoAnio)}</td>
+                    <td style="text-align: right; color: #7c3aed;">${totalCEAnio > 0 ? formatCurrency(totalCEAnio) : '-'}</td>
                     <td style="text-align: right; color: #1971c2;">${totalMRAnio > 0 ? formatCurrency(totalMRAnio) : '-'}</td>
                     <td style="text-align: right;">${formatCurrency(saldoAnio)}</td>
                 </tr>`;
@@ -3961,9 +4013,10 @@
                 const movimientosMR = mrPorFactura[f.number] || [];
 
                 // Calcular totales
-                const totalPagadoRC = pagosFactura
-                    .filter(p => p.movimiento === 'Credit')
-                    .reduce((sum, p) => sum + p.valor, 0);
+                const pagosRC = pagosFactura.filter(p => p.movimiento === 'Credit');
+                const comprobantesCE = pagosFactura.filter(p => p.movimiento !== 'Credit');
+                const totalPagadoRC = pagosRC.reduce((sum, p) => sum + p.valor, 0);
+                const totalCE = comprobantesCE.reduce((sum, p) => sum + p.valor, 0);
                 const totalNC = notasCreditoFactura.reduce((sum, nc) => sum + nc.total, 0);
                 const totalMR = movimientosMR.reduce((sum, mr) => sum + mr.valor, 0);
                 // Convertir balance a COP
@@ -3974,11 +4027,11 @@
                 // Convertir total de factura a COP
                 const totalFacturaCOP = convertirACOP(f.total || 0, fCurrency);
 
-                // Determinar estado (considerando MR)
+                // Determinar estado (considerando MR y CE)
                 let estado = 'pendiente';
                 if (totalNC >= totalFacturaCOP * 0.99) {
                     estado = 'anulada';
-                } else if (saldoAjustado === 0 && (totalPagadoRC > 0 || totalMR > 0)) {
+                } else if (saldoAjustado === 0 && (totalPagadoRC > 0 || totalMR > 0 || totalCE > 0)) {
                     estado = 'pagada';
                 } else if (saldoAjustado === 0) {
                     estado = 'saldada';
@@ -3993,14 +4046,16 @@
                     valorBase: valorBase,
                     iva: totalFacturaCOP - valorBase,
                     total: totalFacturaCOP,
-                    saldo: saldoAjustado,  // Usar saldo ajustado (descuenta MR)
-                    saldoSIIGO: saldoReportado,  // Guardar saldo original de SIIGO (ya en COP)
+                    saldo: saldoAjustado,
+                    saldoSIIGO: saldoReportado,
                     estado: estado,
                     notasCredito: notasCreditoFactura,
-                    pagos: pagosFactura.filter(p => p.movimiento === 'Credit'),
+                    pagos: pagosRC,
+                    comprobantesEgreso: comprobantesCE,
                     movimientosMR: movimientosMR,
                     totalNC: totalNC,
                     totalPagadoRC: totalPagadoRC,
+                    totalCE: totalCE,
                     totalMR: totalMR
                 });
             });
@@ -4028,6 +4083,7 @@
             let totalNCGeneral = 0;
             let totalPagadoGeneral = 0;
             let totalMRGeneral = 0;
+            let totalCEGeneral = 0;
             let saldoPendienteGeneral = 0;
             let documentosMostrados = 0;
 
@@ -4051,6 +4107,7 @@
                 const totalNCAnio = docs.reduce((sum, f) => sum + f.totalNC, 0);
                 const totalPagadoAnio = docs.reduce((sum, f) => sum + (f.totalPagadoRC || 0), 0);
                 const totalMRAnio = docs.reduce((sum, f) => sum + (f.totalMR || 0), 0);
+                const totalCEAnio = docs.reduce((sum, f) => sum + (f.totalCE || 0), 0);
                 const saldoAnio = docs.reduce((sum, f) => sum + f.saldo, 0);
                 const netoAnio = totalFacturasAnio - totalNCAnio;
 
@@ -4058,6 +4115,7 @@
                 totalNCGeneral += totalNCAnio;
                 totalPagadoGeneral += totalPagadoAnio;
                 totalMRGeneral += totalMRAnio;
+                totalCEGeneral += totalCEAnio;
                 saldoPendienteGeneral += saldoAnio;
                 documentosMostrados += docs.length;
 
@@ -4072,6 +4130,7 @@
                             <th style="text-align: right; width: 100px;">Total</th>
                             <th style="text-align: right; width: 90px;">N. Crédito</th>
                             <th style="text-align: right; width: 90px;">Pagado</th>
+                            <th style="text-align: right; width: 90px; color: #7c3aed;">CE</th>
                             <th style="text-align: right; width: 90px; color: #1971c2;">MR</th>
                             <th style="text-align: right; width: 100px;">Saldo</th>
                         </tr>
@@ -4079,7 +4138,7 @@
                     <tbody>`;
 
                 docs.forEach((f, idx) => {
-                    const tieneDetalle = f.notasCredito.length > 0 || f.pagos.length > 0 || (f.movimientosMR && f.movimientosMR.length > 0);
+                    const tieneDetalle = f.notasCredito.length > 0 || f.pagos.length > 0 || (f.comprobantesEgreso && f.comprobantesEgreso.length > 0) || (f.movimientosMR && f.movimientosMR.length > 0);
                     const rowId = `detalle-${anio}-${idx}`;
 
                     // Badge de estado
@@ -4116,6 +4175,7 @@
                             <td style="text-align: right; font-variant-numeric: tabular-nums;">${formatCurrency(f.total)}</td>
                             <td style="text-align: right; font-variant-numeric: tabular-nums; color: var(--teal-principal);">${f.totalNC > 0 ? formatCurrency(f.totalNC) : '-'}</td>
                             <td style="text-align: right; font-variant-numeric: tabular-nums; color: var(--verde-vibrante);">${f.totalPagadoRC > 0 ? formatCurrency(f.totalPagadoRC) : '-'}</td>
+                            <td style="text-align: right; font-variant-numeric: tabular-nums; color: #7c3aed;">${f.totalCE > 0 ? formatCurrency(f.totalCE) : '-'}</td>
                             <td style="text-align: right; font-variant-numeric: tabular-nums; color: #1971c2;">${f.totalMR > 0 ? formatCurrency(f.totalMR) : '-'}</td>
                             <td style="text-align: right; font-variant-numeric: tabular-nums; ${saldoClass}">${formatCurrency(f.saldo)}</td>
                         </tr>
@@ -4124,7 +4184,7 @@
                     // Fila expandible con NC, RC y MR
                     if (tieneDetalle) {
                         html += `<tr class="detalle-subrow-container" id="subrow-${rowId}" style="display: none;">
-                            <td colspan="8" style="padding: 0; background: #f8f9fa;">
+                            <td colspan="9" style="padding: 0; background: #f8f9fa;">
                                 <table style="width: 100%; margin: 0;">
                                     <tbody>`;
 
@@ -4137,7 +4197,7 @@
                                     <td style="font-size: 12px; width: 90px;">${formatDate(nc.fecha)}</td>
                                     <td style="font-size: 11px; color: var(--gris-medio);" title="${nc.concepto || ''}">${ncConceptoCorto}</td>
                                     <td style="text-align: right; font-size: 12px; color: var(--teal-principal); width: 100px;">-${formatCurrency(nc.total)}</td>
-                                    <td colspan="4"></td>
+                                    <td colspan="5"></td>
                                 </tr>
                             `;
                         });
@@ -4152,6 +4212,23 @@
                                     <td></td>
                                     <td></td>
                                     <td style="text-align: right; font-size: 12px; color: var(--verde-vibrante); width: 90px;">${formatCurrency(p.valor)}</td>
+                                    <td colspan="3"></td>
+                                </tr>
+                            `;
+                        });
+
+                        // Comprobantes de Egreso (CE)
+                        (f.comprobantesEgreso || []).forEach(ce => {
+                            html += `
+                                <tr class="pago-subrow" style="background: #f3f0ff;">
+                                    <td style="padding-left: 40px; color: #7c3aed; font-size: 12px; width: 120px;">↳ ${ce.voucherNumero}</td>
+                                    <td style="font-size: 12px; width: 90px;">${formatDate(ce.voucherFecha)}</td>
+                                    <td style="font-size: 11px; color: #7c3aed;">
+                                        <span style="background: #7c3aed; color: white; font-size: 9px; padding: 2px 6px; border-radius: 3px;">COMP. EGRESO</span>
+                                    </td>
+                                    <td colspan="2"></td>
+                                    <td></td>
+                                    <td style="text-align: right; font-size: 12px; color: #7c3aed; font-weight: 600; width: 90px;">${formatCurrency(ce.valor)}</td>
                                     <td colspan="2"></td>
                                 </tr>
                             `;
@@ -4167,6 +4244,7 @@
                                         <span style="background: #1971c2; color: white; font-size: 9px; padding: 2px 6px; border-radius: 3px;">PEND. SIIGO</span>
                                     </td>
                                     <td colspan="3"></td>
+                                    <td></td>
                                     <td style="text-align: right; font-size: 12px; color: #1971c2; font-weight: 600; width: 90px;">${formatCurrency(mr.valor)}</td>
                                     <td></td>
                                 </tr>
@@ -4183,6 +4261,7 @@
                     <td style="text-align: right;">${formatCurrency(docs.reduce((s, f) => s + f.total, 0))}</td>
                     <td style="text-align: right; color: var(--teal-principal);">${formatCurrency(totalNCAnio)}</td>
                     <td style="text-align: right; color: var(--verde-vibrante);">${formatCurrency(docs.reduce((s, f) => s + f.totalPagadoRC, 0))}</td>
+                    <td style="text-align: right; color: #7c3aed;">${totalCEAnio > 0 ? formatCurrency(totalCEAnio) : '-'}</td>
                     <td style="text-align: right; color: #1971c2;">${totalMRAnio > 0 ? formatCurrency(totalMRAnio) : '-'}</td>
                     <td style="text-align: right;">${formatCurrency(saldoAnio)}</td>
                 </tr>`;

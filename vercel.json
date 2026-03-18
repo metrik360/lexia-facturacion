@@ -9,6 +9,7 @@
     }
   ],
   "routes": [
+    { "src": "/demo/?$", "dest": "/demo.html" },
     { "src": "/lexia/api/(.*)", "dest": "/api/$1" },
     { "src": "/lexia/assets/(.*)", "dest": "/assets/$1" },
     { "src": "/lexia/?$", "dest": "/index.html" },
