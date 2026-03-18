@@ -2937,7 +2937,7 @@
                         clienteNombre: clienteInfo.nombre,
                         costCenterId: f.cost_center,
                         lineaNegocio: LINEAS_NEGOCIO[f.cost_center] || 'Sin asignar',
-                        total: valorBase,
+                        total: totalNeto,
                         totalNeto: totalNeto,
                         balance: balance,
                         dias: dias,
@@ -3223,11 +3223,8 @@
                 }
 
                 if (aniosAnalisis.includes(anio)) {
-                    // Calcular valor base (qty * price) - igual que Análisis por Año
-                    let valorFactura = 0;
-                    (f.items || []).forEach(item => {
-                        valorFactura += (item.price || 0) * (item.quantity || 1);
-                    });
+                    const fCurrency = f.currency || null;
+                    const valorFactura = convertirACOP(f.total || 0, fCurrency);
                     ventasPorClienteAnio[nit].facturas[anio] += valorFactura;
                 }
 
@@ -3278,10 +3275,8 @@
                 }
 
                 if (aniosAnalisis.includes(anio)) {
-                    let valorNC = 0;
-                    (nc.items || []).forEach(item => {
-                        valorNC += (item.price || 0) * (item.quantity || 1);
-                    });
+                    const ncCurrency = nc.currency || null;
+                    const valorNC = convertirACOP(nc.total || 0, ncCurrency);
                     ventasPorClienteAnio[nit].nc[anio] += valorNC;
                 }
             });
@@ -3477,14 +3472,8 @@
                 }
 
                 if (aniosAnalisis.includes(anio)) {
-                    // Obtener información de moneda
                     const fCurrency = f.currency || null;
-                    let valorFactura = 0;
-                    (f.items || []).forEach(item => {
-                        valorFactura += (item.price || 0) * (item.quantity || 1);
-                    });
-                    // Convertir a COP
-                    valorFactura = convertirACOP(valorFactura, fCurrency);
+                    const valorFactura = convertirACOP(f.total || 0, fCurrency);
                     ventasPorCC[cc].facturas[anio] += valorFactura;
                 }
             });
@@ -3516,14 +3505,8 @@
                 }
 
                 if (aniosAnalisis.includes(anio)) {
-                    // Obtener información de moneda
                     const ncCurrency = nc.currency || null;
-                    let valorNC = 0;
-                    (nc.items || []).forEach(item => {
-                        valorNC += (item.price || 0) * (item.quantity || 1);
-                    });
-                    // Convertir a COP
-                    valorNC = convertirACOP(valorNC, ncCurrency);
+                    const valorNC = convertirACOP(nc.total || 0, ncCurrency);
                     ventasPorCC[cc].nc[anio] += valorNC;
                 }
             });
@@ -5297,9 +5280,8 @@
                 valorBruto: 0
             };
             facturasDelPeriodo.forEach(f => {
-                (f.items || []).forEach(item => {
-                    totalesFacturas.valorBruto += (item.price || 0) * (item.quantity || 1);
-                });
+                const fCurrency = f.currency || null;
+                totalesFacturas.valorBruto += convertirACOP(f.total || 0, fCurrency);
             });
 
             // Calcular totales generales de notas crédito
@@ -5308,9 +5290,8 @@
                 valorBruto: 0
             };
             notasCreditoDelPeriodo.forEach(nc => {
-                (nc.items || []).forEach(item => {
-                    totalesNC.valorBruto += (item.price || 0) * (item.quantity || 1);
-                });
+                const ncCurrency = nc.currency || null;
+                totalesNC.valorBruto += convertirACOP(nc.total || 0, ncCurrency);
             });
 
             // Calcular totales generales netos
@@ -5392,7 +5373,7 @@
                                 <strong style="color: #166534;">${totalesFacturas.numComprobantes}</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
-                                <span style="color: #15803d;">Valor Bruto:</span>
+                                <span style="color: #15803d;">Total Facturado:</span>
                                 <strong style="color: #166534; font-size: 16px;">${formatCurrency(totalesFacturas.valorBruto)}</strong>
                             </div>
                         </div>
@@ -5408,7 +5389,7 @@
                                 <strong style="color: #991b1b;">${totalesNC.numComprobantes}</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
-                                <span style="color: #b91c1c;">Valor Bruto:</span>
+                                <span style="color: #b91c1c;">Total NC:</span>
                                 <strong style="color: #991b1b; font-size: 16px;">-${formatCurrency(totalesNC.valorBruto)}</strong>
                             </div>
                         </div>
