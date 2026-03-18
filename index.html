@@ -3600,7 +3600,11 @@
                     }
                 }
 
-                const movimientosMR = mrPorFactura[f.number] || [];
+                // Convertir balance a COP
+                const saldoReportado = convertirACOP(f.balance || 0, fCurrency);
+
+                // Si Siigo ya cerró la factura (balance=0), no asignar movimientos de Google Sheets
+                const movimientosMR = saldoReportado <= 0 ? [] : (mrPorFactura[f.number] || []);
 
                 const pagosRC = pagosFactura.filter(p => p.movimiento === 'Credit');
                 const comprobantesCE = pagosFactura.filter(p => p.movimiento !== 'Credit');
@@ -3608,9 +3612,12 @@
                 const totalCE = comprobantesCE.reduce((sum, p) => sum + p.valor, 0);
                 const totalNC = notasCreditoFactura.reduce((sum, nc) => sum + nc.total, 0);
                 const totalMR = movimientosMR.reduce((sum, mr) => sum + mr.valor, 0);
-                // Convertir balance a COP
-                const saldoReportado = convertirACOP(f.balance || 0, fCurrency);
-                const saldoAjustado = Math.max(0, saldoReportado - totalMR);
+                let saldoAjustado = Math.max(0, saldoReportado - totalMR);
+
+                // Micro-saldos < $1000 se tratan como pagados
+                if (saldoAjustado > 0 && saldoAjustado < 1000) {
+                    saldoAjustado = 0;
+                }
 
                 // Convertir total de factura a COP para comparación
                 const totalFacturaCOP = convertirACOP(f.total || 0, fCurrency);
@@ -4009,8 +4016,11 @@
                     }
                 }
 
-                // Buscar MR (Movimientos Registrados) asociados - por número de factura
-                const movimientosMR = mrPorFactura[f.number] || [];
+                // Convertir balance a COP
+                const saldoReportado = convertirACOP(f.balance || 0, fCurrency);
+
+                // Si Siigo ya cerró la factura (balance=0), no asignar movimientos de Google Sheets
+                const movimientosMR = saldoReportado <= 0 ? [] : (mrPorFactura[f.number] || []);
 
                 // Calcular totales
                 const pagosRC = pagosFactura.filter(p => p.movimiento === 'Credit');
@@ -4019,10 +4029,12 @@
                 const totalCE = comprobantesCE.reduce((sum, p) => sum + p.valor, 0);
                 const totalNC = notasCreditoFactura.reduce((sum, nc) => sum + nc.total, 0);
                 const totalMR = movimientosMR.reduce((sum, mr) => sum + mr.valor, 0);
-                // Convertir balance a COP
-                const saldoReportado = convertirACOP(f.balance || 0, fCurrency);
-                // Saldo ajustado = saldo SIIGO - pagos MR pendientes de cargar
-                const saldoAjustado = Math.max(0, saldoReportado - totalMR);
+                let saldoAjustado = Math.max(0, saldoReportado - totalMR);
+
+                // Micro-saldos < $1000 se tratan como pagados
+                if (saldoAjustado > 0 && saldoAjustado < 1000) {
+                    saldoAjustado = 0;
+                }
 
                 // Convertir total de factura a COP
                 const totalFacturaCOP = convertirACOP(f.total || 0, fCurrency);
@@ -6140,8 +6152,12 @@
                     }
                 }
 
-                // Buscar MR (Movimientos Registrados) asociados - por número de factura
-                const movimientosMR = mrPorFactura[f.number] || [];
+                // Convertir valores de factura a COP
+                const totalFacturaCOP = convertirACOP(f.total || 0, fCurrency);
+                const saldoReportado = convertirACOP(f.balance || 0, fCurrency);
+
+                // Si Siigo ya cerró la factura (balance=0), no asignar movimientos de Google Sheets
+                const movimientosMR = saldoReportado <= 0 ? [] : (mrPorFactura[f.number] || []);
 
                 // Calcular totales
                 const totalPagadoRC = pagosFactura
@@ -6151,14 +6167,15 @@
                 const totalNC = notasCreditoFactura.reduce((sum, nc) => sum + nc.total, 0);
                 const totalMR = movimientosMR.reduce((sum, mr) => sum + mr.valor, 0);
 
-                // Convertir valores de factura a COP
-                const totalFacturaCOP = convertirACOP(f.total || 0, fCurrency);
-                const saldoReportado = convertirACOP(f.balance || 0, fCurrency);
-
                 // Saldo calculado = Total - Pagos RC - Notas Crédito
                 const saldoCalculado = totalFacturaCOP - totalPagadoRC - totalNC;
                 // Saldo ajustado = saldo SIIGO - pagos MR pendientes de cargar
-                const saldoAjustado = Math.max(0, saldoReportado - totalMR);
+                let saldoAjustado = Math.max(0, saldoReportado - totalMR);
+
+                // Micro-saldos < $1000 se tratan como pagados
+                if (saldoAjustado > 0 && saldoAjustado < 1000) {
+                    saldoAjustado = 0;
+                }
                 const diferencia = Math.abs(saldoReportado - saldoCalculado);
                 const hayDiscrepancia = diferencia > 1;
 
@@ -6183,11 +6200,16 @@
                     }
                 }
 
-                // Determinar estado (considerando MR)
+                // CE totales
+                const totalCE = pagosFactura
+                    .filter(p => p.movimiento !== 'Credit')
+                    .reduce((sum, p) => sum + p.valor, 0);
+
+                // Determinar estado (considerando MR y CE)
                 let estado = 'pendiente';
                 if (totalNC >= totalFacturaCOP * 0.99) { // 99% para tolerancia
                     estado = 'anulada';
-                } else if (saldoAjustado === 0 && (totalPagadoRC > 0 || totalMR > 0)) {
+                } else if (saldoAjustado === 0 && (totalPagadoRC > 0 || totalMR > 0 || totalCE > 0)) {
                     estado = 'pagada';
                 } else if (saldoAjustado === 0) {
                     estado = 'saldada';
