@@ -2253,16 +2253,25 @@
             });
         }
 
-        // Buscar factura en datos CRUDOS de SIIGO (incluye balance = 0)
-        // Retorna true si la factura existe y tiene balance = 0
-        function facturaYaCerradaEnSiigo(numFactura) {
-            return facturas.some(f => {
-                const numero = `${f.prefix}-${f.number}`;
+        // Retorna true si la factura ya fue gestionada en SIIGO:
+        // - balance = 0 (cerrada), O
+        // - tiene vouchers registrados (RC o CE)
+        // En ambos casos, el movimiento de Google Sheets es redundante.
+        function facturaYaGestionadaEnSiigo(numFactura) {
+            const factura = facturas.find(f => {
                 const numSolo = String(f.number);
-                const coincide = numSolo === String(numFactura) ||
-                                 numero.includes(String(numFactura));
-                return coincide && f.balance <= 0;
+                const numero = `${f.prefix}-${f.number}`;
+                return numSolo === String(numFactura) || numero.includes(String(numFactura));
             });
+            if (!factura) return false;
+            if (factura.balance <= 0) return true;
+            // Verificar si tiene vouchers (RC o CE) registrados
+            const facturaName = factura.name || `${factura.prefix}-${factura.number}`;
+            const llavesPosibles = [facturaName, `FV-2-${factura.number}`, `FV-1-${factura.number}`, `${factura.prefix}-${factura.number}`];
+            for (const llave of llavesPosibles) {
+                if (pagosPorFactura[llave] && pagosPorFactura[llave].length > 0) return true;
+            }
+            return false;
         }
 
         // Procesar y clasificar movimientos bancarios
@@ -2284,7 +2293,7 @@
                     // Verificar si TODAS las facturas referenciadas ya tienen balance 0 en SIIGO.
                     // Si es así, el contador ya registró el pago con otro documento (CE, ajuste, etc.)
                     // y no debemos contabilizar este movimiento para evitar doble conteo.
-                    const todasCerradas = mov.facturas.every(numFac => facturaYaCerradaEnSiigo(numFac));
+                    const todasCerradas = mov.facturas.every(numFac => facturaYaGestionadaEnSiigo(numFac));
                     if (todasCerradas) {
                         movimientosDescartados++;
                         console.log(`Movimiento descartado (factura(s) ya cerrada en SIIGO): Doc ${mov.documento}, Facturas: ${mov.facturas.join(',')}, Valor: ${mov.valor}`);
@@ -3780,8 +3789,8 @@
                 // Convertir balance a COP
                 const saldoReportado = convertirACOP(f.balance || 0, fCurrency);
 
-                // Si Siigo ya cerró la factura (balance=0), no asignar movimientos de Google Sheets
-                const movimientosMR = saldoReportado <= 0 ? [] : (mrPorFactura[f.number] || []);
+                // Si Siigo ya gestionó la factura (balance=0 o tiene RC/CE), ignorar Google Sheets
+                const movimientosMR = (saldoReportado <= 0 || pagosFactura.length > 0) ? [] : (mrPorFactura[f.number] || []);
 
                 const pagosRC = pagosFactura.filter(p => p.movimiento === 'Credit');
                 const comprobantesCE = pagosFactura.filter(p => p.movimiento !== 'Credit');
@@ -4238,8 +4247,8 @@
                 // Convertir balance a COP
                 const saldoReportado = convertirACOP(f.balance || 0, fCurrency);
 
-                // Si Siigo ya cerró la factura (balance=0), no asignar movimientos de Google Sheets
-                const movimientosMR = saldoReportado <= 0 ? [] : (mrPorFactura[f.number] || []);
+                // Si Siigo ya gestionó la factura (balance=0 o tiene RC/CE), ignorar Google Sheets
+                const movimientosMR = (saldoReportado <= 0 || pagosFactura.length > 0) ? [] : (mrPorFactura[f.number] || []);
 
                 // Calcular totales
                 const pagosRC = pagosFactura.filter(p => p.movimiento === 'Credit');
@@ -6389,8 +6398,8 @@
                 const totalFacturaCOP = convertirACOP(f.total || 0, fCurrency);
                 const saldoReportado = convertirACOP(f.balance || 0, fCurrency);
 
-                // Si Siigo ya cerró la factura (balance=0), no asignar movimientos de Google Sheets
-                const movimientosMR = saldoReportado <= 0 ? [] : (mrPorFactura[f.number] || []);
+                // Si Siigo ya gestionó la factura (balance=0 o tiene RC/CE), ignorar Google Sheets
+                const movimientosMR = (saldoReportado <= 0 || pagosFactura.length > 0) ? [] : (mrPorFactura[f.number] || []);
 
                 // Calcular totales
                 const totalPagadoRC = pagosFactura
