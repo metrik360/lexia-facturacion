@@ -2461,6 +2461,91 @@
             if (modal) modal.remove();
         }
 
+        function cerrarModalMR() {
+            const modal = document.getElementById('modalDetalleMR');
+            if (modal) modal.remove();
+        }
+
+        function mostrarDetalleMR() {
+            if (movimientosConFactura.length === 0) return;
+
+            // Agrupar MR por cliente
+            const mrPorCliente = {};
+            movimientosConFactura.forEach(mr => {
+                const clienteNombre = mr.clienteEncontrado?.nombre || 'Sin identificar';
+                const clienteNit = mr.clienteEncontrado?.nit || 'N/A';
+                const key = clienteNit;
+                if (!mrPorCliente[key]) {
+                    mrPorCliente[key] = { nombre: clienteNombre, nit: clienteNit, movimientos: [], total: 0 };
+                }
+                mrPorCliente[key].movimientos.push(mr);
+                mrPorCliente[key].total += (mr.valor || 0);
+            });
+
+            const clientesOrdenados = Object.values(mrPorCliente).sort((a, b) => b.total - a.total);
+            const totalGeneral = clientesOrdenados.reduce((sum, c) => sum + c.total, 0);
+
+            const modalHTML = `
+                <div id="modalDetalleMR" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+                    <div style="background: white; border-radius: 12px; width: 90%; max-width: 900px; max-height: 85vh; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+                        <div style="background: #e0f2f1; padding: 16px 24px; border-bottom: 1px solid var(--teal-principal); display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="margin: 0; color: var(--teal-oscuro); display: flex; align-items: center; gap: 8px;">
+                                Pagos Pendientes por Registrar en SIIGO
+                            </h3>
+                            <button onclick="cerrarModalMR()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--teal-oscuro);">&times;</button>
+                        </div>
+                        <div style="padding: 24px; overflow-y: auto; max-height: 70vh;">
+                            <p style="margin-bottom: 16px; color: #666; font-size: 13px;">
+                                Estos movimientos bancarios ya tienen factura identificada pero aun no han sido registrados en SIIGO.
+                                Total: <strong style="color: var(--teal-principal);">${formatCurrency(totalGeneral)}</strong> en ${movimientosConFactura.length} movimientos.
+                            </p>
+                            ${clientesOrdenados.map(cliente => `
+                                <div style="margin-bottom: 20px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #f8f9fa; border-radius: 6px; margin-bottom: 4px;">
+                                        <div>
+                                            <strong style="color: var(--gris-oscuro);">${cliente.nombre}</strong>
+                                            <span style="color: var(--gris-medio); font-size: 12px; margin-left: 8px;">NIT: ${cliente.nit}</span>
+                                        </div>
+                                        <strong style="color: var(--teal-principal);">${formatCurrency(cliente.total)}</strong>
+                                    </div>
+                                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                                        <thead>
+                                            <tr style="border-bottom: 1px solid #eee;">
+                                                <th style="padding: 8px 12px; text-align: left; color: var(--gris-medio); font-weight: 500;">Doc. Banco</th>
+                                                <th style="padding: 8px 12px; text-align: left; color: var(--gris-medio); font-weight: 500;">Facturas</th>
+                                                <th style="padding: 8px 12px; text-align: left; color: var(--gris-medio); font-weight: 500;">Fecha</th>
+                                                <th style="padding: 8px 12px; text-align: right; color: var(--gris-medio); font-weight: 500;">Valor</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${cliente.movimientos.map(mr => `
+                                                <tr style="border-bottom: 1px solid #f0f0f0;">
+                                                    <td style="padding: 8px 12px; font-family: monospace;">${mr.documento || '-'}</td>
+                                                    <td style="padding: 8px 12px;">
+                                                        ${(mr.facturas || []).map(fac => `<span style="background: #e0f2f1; color: var(--teal-oscuro); padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 4px;">${fac}</span>`).join('')}
+                                                    </td>
+                                                    <td style="padding: 8px 12px;">${formatDate(mr.fecha)}</td>
+                                                    <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: var(--teal-principal);">${formatCurrency(mr.valor)}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            `).join('')}
+                            <div style="margin-top: 16px; padding: 16px; background: #e0f2f1; border-radius: 8px; border-left: 4px solid var(--teal-principal);">
+                                <p style="margin: 0; color: var(--teal-oscuro); font-size: 13px;">
+                                    <strong>Accion requerida:</strong> Registrar estos pagos en SIIGO para que se reflejen en el saldo de cartera.
+                                    Una vez registrados, el sistema los detectara automaticamente.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
         // Actualizar solo movimientos bancarios (sin recargar SIIGO)
         async function actualizarMovimientos() {
             const btnMov = document.getElementById('btnRefreshMov');
@@ -3491,15 +3576,16 @@
                 });
             }
 
-            // Buscador
+            // Buscador y filtros
             let html = `
-                <div class="detalle-search-container" style="margin-bottom: 16px;">
+                <div style="margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px;">
                     <input type="text"
                            id="searchDetalleTodos"
-                           placeholder="Buscar por número de factura, cliente o concepto..."
+                           placeholder="Buscar por numero de factura, cliente o concepto..."
                            value="${filtroDetalleTodos}"
                            oninput="filtrarDetalleTodos(this.value)"
-                           style="width: 100%; padding: 10px 14px; border: 1px solid var(--gris-claro); border-radius: 6px; font-size: 14px;">
+                           style="width: 100%; padding: 10px 14px; border: 1px solid var(--gris-claro); border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                    ${renderFiltroEstadoBar(filtroEstadoTodos, 'cambiarFiltroEstadoTodos')}
                 </div>
             `;
 
@@ -3676,6 +3762,17 @@
                         d.nit.toLowerCase().includes(filtroBusqueda) ||
                         d.concepto.toLowerCase().includes(filtroBusqueda)
                     );
+                }
+
+                // Aplicar filtro de estado
+                if (filtroEstadoTodos === 'pendiente') {
+                    docs = docs.filter(d => d.estado === 'pendiente' || d.estado === 'nc_parcial');
+                } else if (filtroEstadoTodos === 'mr') {
+                    docs = docs.filter(d => d.movimientosMR && d.movimientosMR.length > 0);
+                } else if (filtroEstadoTodos === 'pagada') {
+                    docs = docs.filter(d => d.estado === 'pagada' || d.estado === 'saldada');
+                } else if (filtroEstadoTodos === 'anulada') {
+                    docs = docs.filter(d => d.estado === 'anulada');
                 }
 
                 if (docs.length === 0) return;
@@ -3883,14 +3980,23 @@
 
         // Variable para el filtro de búsqueda en detalle de todos
         let filtroDetalleTodos = '';
+        let filtroEstadoTodos = ''; // '', 'pendiente', 'mr', 'pagada', 'anulada'
 
         // Filtrar detalle de todos (función para el input de búsqueda)
         function filtrarDetalleTodos(valor) {
             filtroDetalleTodos = valor;
+            reRenderDetalleTodos();
+        }
+
+        function cambiarFiltroEstadoTodos(estado) {
+            filtroEstadoTodos = filtroEstadoTodos === estado ? '' : estado;
+            reRenderDetalleTodos();
+        }
+
+        function reRenderDetalleTodos() {
             const contenedor = document.getElementById('tablaDetalleCliente');
             if (contenedor) {
                 contenedor.innerHTML = renderDetalleClienteTodos();
-                // Mantener el foco en el input
                 const input = document.getElementById('searchDetalleTodos');
                 if (input) {
                     input.focus();
@@ -3901,6 +4007,28 @@
 
         // Variable para el filtro de búsqueda en detalle
         let filtroDetalleCliente = '';
+        let filtroEstadoCliente = ''; // '', 'pendiente', 'mr', 'pagada', 'anulada'
+
+        function renderFiltroEstadoBar(filtroActual, onClickFn) {
+            const botones = [
+                { id: '', label: 'Todas', color: 'var(--gris-oscuro)', bg: '#f1f5f9' },
+                { id: 'pendiente', label: 'Pendientes', color: '#dc2626', bg: '#fef2f2' },
+                { id: 'mr', label: 'Con MR', color: '#1971c2', bg: '#e7f5ff' },
+                { id: 'pagada', label: 'Pagadas', color: 'var(--verde-vibrante)', bg: '#f0fdf4' },
+                { id: 'anulada', label: 'Anuladas', color: '#dc3545', bg: '#fef2f2' }
+            ];
+            return `<div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                ${botones.map(b => {
+                    const activo = filtroActual === b.id;
+                    return `<button onclick="${onClickFn}('${b.id}')" style="
+                        padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s;
+                        border: 1.5px solid ${activo ? b.color : '#ddd'};
+                        background: ${activo ? b.bg : 'white'};
+                        color: ${activo ? b.color : 'var(--gris-medio)'};
+                    ">${b.label}</button>`;
+                }).join('')}
+            </div>`;
+        }
 
         // Renderizar tabla de detalle de facturas y NC por cliente
         function renderDetalleCliente(nit, nombreCliente) {
@@ -4079,13 +4207,14 @@
             const filtro = filtroDetalleCliente.toLowerCase().trim();
 
             let html = `
-                <div class="detalle-search-container" style="margin-bottom: 16px;">
+                <div style="margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px;">
                     <input type="text"
                            id="searchDetalleCliente"
-                           placeholder="Buscar por número de factura o concepto..."
+                           placeholder="Buscar por numero de factura o concepto..."
                            value="${filtroDetalleCliente}"
                            oninput="filtrarDetalleCliente(this.value)"
-                           style="width: 100%; padding: 10px 14px; border: 1px solid var(--gris-claro); border-radius: 6px; font-size: 14px;">
+                           style="width: 100%; padding: 10px 14px; border: 1px solid var(--gris-claro); border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                    ${renderFiltroEstadoBar(filtroEstadoCliente, 'cambiarFiltroEstadoCliente')}
                 </div>
             `;
 
@@ -4102,12 +4231,23 @@
             aniosOrdenados.forEach(anio => {
                 let docs = documentosPorAnio[anio];
 
-                // Aplicar filtro si existe
+                // Aplicar filtro de texto si existe
                 if (filtro) {
                     docs = docs.filter(d =>
                         d.numero.toLowerCase().includes(filtro) ||
                         d.concepto.toLowerCase().includes(filtro)
                     );
+                }
+
+                // Aplicar filtro de estado
+                if (filtroEstadoCliente === 'pendiente') {
+                    docs = docs.filter(d => d.estado === 'pendiente' || d.estado === 'nc_parcial');
+                } else if (filtroEstadoCliente === 'mr') {
+                    docs = docs.filter(d => d.movimientosMR && d.movimientosMR.length > 0);
+                } else if (filtroEstadoCliente === 'pagada') {
+                    docs = docs.filter(d => d.estado === 'pagada' || d.estado === 'saldada');
+                } else if (filtroEstadoCliente === 'anulada') {
+                    docs = docs.filter(d => d.estado === 'anulada');
                 }
 
                 if (docs.length === 0) return;
@@ -4327,6 +4467,15 @@
         // Filtrar detalle de cliente
         function filtrarDetalleCliente(valor) {
             filtroDetalleCliente = valor;
+            reRenderDetalleCliente();
+        }
+
+        function cambiarFiltroEstadoCliente(estado) {
+            filtroEstadoCliente = filtroEstadoCliente === estado ? '' : estado;
+            reRenderDetalleCliente();
+        }
+
+        function reRenderDetalleCliente() {
             if (clienteSeleccionadoTabla) {
                 const row = document.querySelector(`.cliente-row[data-nit="${clienteSeleccionadoTabla}"]`);
                 if (row) {
@@ -4334,7 +4483,6 @@
                     const contenedor = document.getElementById('tablaDetalleCliente');
                     if (contenedor) {
                         contenedor.innerHTML = renderDetalleCliente(clienteSeleccionadoTabla, nombre);
-                        // Mantener el foco en el input
                         const input = document.getElementById('searchDetalleCliente');
                         if (input) {
                             input.focus();
@@ -4761,31 +4909,24 @@
                         <div class="kpi-value" style="color: var(--verde-vibrante);">${formatCurrency(kpis.carteraReal)}</div>
                         <div class="kpi-subtitle">Ajustada por ingresos bancarios</div>
                     </div>
-                    <div class="kpi-card" style="border-left: 4px solid var(--teal-principal);">
+                    <div class="kpi-card" style="border-left: 4px solid var(--teal-principal); cursor: pointer; transition: box-shadow 0.2s;" onclick="mostrarDetalleMR()" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.12)'" onmouseout="this.style.boxShadow=''">
                         <div class="kpi-label">Pagos con Factura (MR)</div>
                         <div class="kpi-value" style="color: var(--teal-principal);">${formatCurrency(kpis.movimientos.conFactura.valor)}</div>
                         <div class="kpi-subtitle">${kpis.movimientos.conFactura.cantidad} movimientos | Por registrar en SIIGO</div>
+                        <div style="text-align: right; margin-top: 4px; font-size: 11px; color: var(--teal-principal);">Ver detalle &#8250;</div>
                     </div>
                     <div class="kpi-card" style="border-left: 4px solid var(--amarillo);">
                         <div class="kpi-label">Pendiente por Identificar Factura</div>
                         <div class="kpi-value" style="color: #b45309;">${formatCurrency(kpis.movimientos.sinIdentificar.valor)}</div>
                         <div class="kpi-subtitle">${kpis.movimientos.sinIdentificar.cantidad} pagos | Cliente sin factura cruzada</div>
                     </div>
-                    <div class="kpi-card" style="border-left: 4px solid var(--rojo);">
+                    <div class="kpi-card" style="border-left: 4px solid var(--rojo); ${kpis.movimientos.alertasNIT > 0 ? 'cursor: pointer; transition: box-shadow 0.2s;' : ''}" ${kpis.movimientos.alertasNIT > 0 ? `onclick="mostrarAlertasNIT()" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.12)'" onmouseout="this.style.boxShadow=''"` : ''}>
                         <div class="kpi-label">Pendiente por Identificar Cliente</div>
                         <div class="kpi-value" style="color: var(--rojo);">${formatCurrency(kpis.movimientos.enLimbo.valor)}</div>
                         <div class="kpi-subtitle">${kpis.movimientos.enLimbo.cantidad} pagos | Sin cliente identificado</div>
+                        ${kpis.movimientos.alertasNIT > 0 ? `<div style="text-align: right; margin-top: 4px; font-size: 11px; color: var(--rojo);">${kpis.movimientos.alertasNIT} NITs no encontrados &#8250;</div>` : ''}
                     </div>
                 </div>
-                ${kpis.movimientos.alertasNIT > 0 ? `
-                <div class="alert-banner" style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px 16px; margin-top: 12px; display: flex; align-items: center; gap: 12px;">
-                    <span style="font-size: 20px;">⚠️</span>
-                    <div>
-                        <strong style="color: #92400e;">Alerta: ${kpis.movimientos.alertasNIT} NITs no encontrados en SIIGO</strong>
-                        <p style="margin: 4px 0 0 0; font-size: 13px; color: #78350f;">Hay pagos con NITs que no coinciden con ningún cliente registrado. <a href="#" onclick="mostrarAlertasNIT(); return false;" style="color: #1d4ed8;">Ver detalle</a></p>
-                    </div>
-                </div>
-                ` : ''}
                 ` : ''}
 
                 <!-- Selector de Años para Gráficos -->
