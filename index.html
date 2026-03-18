@@ -3093,16 +3093,8 @@
                 // Obtener información de moneda de la factura
                 const fCurrency = f.currency || null;
 
-                // Sumar valor base (qty * price) - coincide con SIIGO
-                let totalFactura = 0;
-                (f.items || []).forEach(item => {
-                    const qty = item.quantity || 0;
-                    const price = item.price || 0;
-                    totalFactura += qty * price;
-                });
-
-                // Convertir a COP si es moneda extranjera
-                totalFactura = convertirACOP(totalFactura, fCurrency);
+                // Usar f.total (incluye IVA) - consistente con tablas de detalle
+                const totalFactura = convertirACOP(f.total || 0, fCurrency);
 
                 ventasPorMesAnio[anio][mes].ventas += totalFactura;
             });
@@ -3125,19 +3117,9 @@
                     if (lineaNC !== filtros.lineaNegocio) return;
                 }
 
-                // Obtener información de moneda de la NC
+                // Usar nc.total (incluye IVA) - consistente con tablas de detalle
                 const ncCurrency = nc.currency || null;
-
-                // Sumar valor base de NC (qty * price)
-                let totalNC = 0;
-                (nc.items || []).forEach(item => {
-                    const qty = item.quantity || 0;
-                    const price = item.price || 0;
-                    totalNC += qty * price;
-                });
-
-                // Convertir a COP si es moneda extranjera
-                totalNC = convertirACOP(totalNC, ncCurrency);
+                const totalNC = convertirACOP(nc.total || 0, ncCurrency);
 
                 ventasPorMesAnio[anio][mes].nc += totalNC;
             });
@@ -6823,19 +6805,9 @@
                         if (lineaFactura !== filtros.lineaNegocio) return;
                     }
 
-                    // Obtener información de moneda de la factura
+                    // Usar f.total (incluye IVA) - consistente con tablas de detalle
                     const fCurrency = f.currency || null;
-
-                    // Sumar valor base (qty * price) - coincide con reporte SIIGO
-                    let totalFactura = 0;
-                    (f.items || []).forEach(item => {
-                        const qty = item.quantity || 0;
-                        const price = item.price || 0;
-                        totalFactura += qty * price;
-                    });
-
-                    // Convertir a COP si es moneda extranjera
-                    totalFactura = convertirACOP(totalFactura, fCurrency);
+                    const totalFactura = convertirACOP(f.total || 0, fCurrency);
 
                     ventasPorMes[mes].ventas += totalFactura;
                     ventasPorMes[mes].facturas += 1;
@@ -6859,19 +6831,9 @@
                         if (lineaNC !== filtros.lineaNegocio) return;
                     }
 
-                    // Obtener información de moneda de la NC
+                    // Usar nc.total (incluye IVA) - consistente con tablas de detalle
                     const ncCurrency = nc.currency || null;
-
-                    // Sumar valor base de NC (qty * price)
-                    let totalNC = 0;
-                    (nc.items || []).forEach(item => {
-                        const qty = item.quantity || 0;
-                        const price = item.price || 0;
-                        totalNC += qty * price;
-                    });
-
-                    // Convertir a COP si es moneda extranjera
-                    totalNC = convertirACOP(totalNC, ncCurrency);
+                    const totalNC = convertirACOP(nc.total || 0, ncCurrency);
 
                     ventasPorMes[mes].nc += totalNC;
                     ventasPorMes[mes].notasCredito += 1;
@@ -8055,12 +8017,7 @@
                     const nit = f.customer?.identification || 'N/A';
                     const nombreCliente = clientesMap[nit]?.nombre || f.customer?.name || nit;
                     const fCurrency = f.currency || null;
-
-                    let totalFactura = 0;
-                    (f.items || []).forEach(item => {
-                        totalFactura += (item.quantity || 0) * (item.price || 0);
-                    });
-                    totalFactura = convertirACOP(totalFactura, fCurrency);
+                    const totalFactura = convertirACOP(f.total || 0, fCurrency);
 
                     if (!ventasPorClienteAnio[nit]) {
                         ventasPorClienteAnio[nit] = { nit, nombre: nombreCliente, anios: {} };
@@ -8084,12 +8041,7 @@
 
                     const nit = nc.customer?.identification || 'N/A';
                     const ncCurrency = nc.currency || null;
-
-                    let totalNC = 0;
-                    (nc.items || []).forEach(item => {
-                        totalNC += (item.quantity || 0) * (item.price || 0);
-                    });
-                    totalNC = convertirACOP(totalNC, ncCurrency);
+                    const totalNC = convertirACOP(nc.total || 0, ncCurrency);
 
                     if (ventasPorClienteAnio[nit]) {
                         ventasPorClienteAnio[nit].anios[anio] -= totalNC;
@@ -8126,12 +8078,7 @@
 
                     const cc = LINEAS_NEGOCIO[f.cost_center] || 'Sin asignar';
                     const fCurrency = f.currency || null;
-
-                    let totalFactura = 0;
-                    (f.items || []).forEach(item => {
-                        totalFactura += (item.quantity || 0) * (item.price || 0);
-                    });
-                    totalFactura = convertirACOP(totalFactura, fCurrency);
+                    const totalFactura = convertirACOP(f.total || 0, fCurrency);
 
                     if (!ventasPorCCAnio[cc]) {
                         ventasPorCCAnio[cc] = { nombre: cc, anios: {} };
@@ -8155,12 +8102,7 @@
 
                     const cc = LINEAS_NEGOCIO[nc.cost_center] || 'Sin asignar';
                     const ncCurrency = nc.currency || null;
-
-                    let totalNC = 0;
-                    (nc.items || []).forEach(item => {
-                        totalNC += (item.quantity || 0) * (item.price || 0);
-                    });
-                    totalNC = convertirACOP(totalNC, ncCurrency);
+                    const totalNC = convertirACOP(nc.total || 0, ncCurrency);
 
                     if (ventasPorCCAnio[cc]) {
                         ventasPorCCAnio[cc].anios[anio] -= totalNC;
