@@ -8354,7 +8354,7 @@
                     <!-- ========== TABLA DETALLE MENSUAL ========== -->
                     <div style="${estiloSeccion} margin-bottom: 12px;">
                         <h2 style="font-size: 11px; font-weight: 700; color: #003839; margin: 0 0 6px 0; border-bottom: 2px solid #7BDCB5; padding-bottom: 4px;">
-                            Detalle Mensual ${anioAnalisis}
+                            Detalle Mensual ${anioAnalisis}${mesAnalisisPDF < 12 ? ' | Ene - ' + MESES[mesAnalisisPDF - 1] : ''}
                         </h2>
                         <table style="width: 100%; border-collapse: collapse; font-size: 7px; ${estiloTabla}">
                             <thead>
@@ -8368,7 +8368,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                ${MESES.map((mes, i) => {
+                                ${MESES.slice(0, mesAnalisisPDF).map((mes, i) => {
                                     const data = ventasMensualesAnio[i + 1];
                                     return `
                                         <tr style="background: ${i % 2 === 0 ? '#f9f9f9' : 'white'};">
