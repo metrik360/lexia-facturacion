@@ -11,7 +11,7 @@ export default async function handler(req, res) {
         return res.status(200).end();
     }
 
-    const { endpoint, username, access_key, page, page_size } = req.query;
+    const { endpoint, username, access_key, page, page_size, ...extraParams } = req.query;
 
     if (!endpoint) {
         return res.status(400).json({ error: 'Endpoint requerido' });
@@ -50,11 +50,15 @@ export default async function handler(req, res) {
             return res.status(401).json({ error: 'Token de autorización requerido' });
         }
 
-        // Construir URL de Siigo con parámetros de paginación
+        // Construir URL de Siigo con parámetros de paginación y filtros adicionales
         let siigoUrl = `https://api.siigo.com/v1/${endpoint}`;
         const queryParams = [];
         if (page) queryParams.push(`page=${page}`);
         if (page_size) queryParams.push(`page_size=${page_size}`);
+        // Pasar filtros adicionales a Siigo (date_start, date_end, etc.)
+        for (const [key, value] of Object.entries(extraParams)) {
+            queryParams.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+        }
         if (queryParams.length > 0) {
             siigoUrl += `?${queryParams.join('&')}`;
         }

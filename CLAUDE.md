@@ -128,24 +128,30 @@ El frontend detecta automaticamente el entorno (linea ~2083-2089):
 
 ## Sprint actual
 - **Fase:** Soporte
-- **Objetivo:** Mantenimiento y mejoras puntuales al PDF
-- **Progreso:** Sprint 2 (mejoras PDF) practicamente cerrado
+- **Objetivo:** Consistencia de datos, mejoras UX y PDF
+- **Progreso:** Mejoras de consistencia completadas, PDF corregido, demo marca blanca creada
 
 ## Ultimo avance
-**Sesion:** 2026-03-11
-**Branch:** main
+**Sesion:** 2026-03-18
+**Branch:** main (11 commits)
 
 Que se hizo:
-- Diagnosticado que lexia.metrik.com.co apuntaba a proyecto viejo (dashboard-pi-snowy-93) en cuenta personal de Vercel
-- Migrado dominio lexia.metrik.com.co al proyecto correcto en team metrik-one
-- Fix PDF: para anos anteriores al actual, mesAnalisisPDF usa 12 (ano completo) en vez del mes actual
-- Fix PDF: cambiarAnioAnalisis() ahora pone cierreMes='12' para anos pasados
-- Agregado cache headers en vercel.json para evitar versiones cacheadas
+- Demo marca blanca (`demo.html`) mobile-first para reel Instagram con paleta MéTRIK, 3 pantallas (KPIs, Cartera, Historico), CTA WhatsApp, ruta /demo en Vercel
+- Columna CE (Comprobantes de Egreso) en tablas detalle de facturas (renderDetalleCliente y renderDetalleClienteTodos)
+- Fix cartera negativa: `facturaYaGestionadaEnSiigo()` verifica balance=0 O presencia de RC/CE en `pagosPorFactura`. Si Siigo ya gestiono, ignora Google Sheets MR
+- Filtro micro-saldos: facturas con saldo < $1,000 tratadas como pagadas (3 ubicaciones)
+- Filtros de estado en tablas detalle: pills (Todas/Pendientes/Con MR/Pagadas/Anuladas) con `renderFiltroEstadoBar()`
+- KPIs clickeables en Resumen: modal MR (`mostrarDetalleMR()`), modal Sin Identificar (`mostrarDetalleSinIdentificar()`), modal NITs no encontrados
+- PDF respeta mes de cierre: titulo incluye periodo, KPIs muestran rango, datos limitados a `mesAnalisisPDF`, filename incluye mes
+- Tabla detalle mensual del PDF: solo muestra meses hasta cierre (`MESES.slice(0, mesAnalisisPDF)`), page-break-before para hoja aparte
+- Graficas del PDF: barras del ano en curso solo hasta `mesAnalisisPDF`, meses posteriores vacios. Maximos calculados respetando corte
+- Unificacion total de calculos: TODO el sistema usa `f.total` (con IVA) en vez de `qty * price` (sin IVA). Afecta: calcularVentasMensuales, calcularVentasMensualesConciliacion, PDF (clientes, CC), Facturacion (clientes, CC), facturasProcessed.total, totalesFacturas/NC en conciliacion
+- Fechas invalidas corregidas en modal MR (`formatDate()` robusto), movimientos valor cero excluidos de todas las categorias
 
 ## Pendientes
-- [ ] Commitear cambios de esta sesion (index.html, vercel.json)
+- [ ] Push commits al remoto (11 commits locales en main)
+- [ ] Migrar repo a bi-metrik (actualmente en metrik360)
 - [ ] Migrar www.metrik.com.co a metrik-one si se necesita
-- [ ] Actualizar repo a bi-metrik (actualmente en metrik360)
 
 ## Decisiones clave
 | Fecha | Decision | Contexto |
@@ -157,11 +163,16 @@ Que se hizo:
 | 09/03/2026 | Var % reemplaza columna Total en tablas PDF | Mas insight comparativo |
 | 11/03/2026 | Dominios Vercel centralizados en team metrik-one | Cuenta personal queda limpia |
 | 11/03/2026 | metrik.com.co (sin www) sigue en GitHub Pages | No afectado por migracion |
+| 18/03/2026 | Siigo prioridad sobre Google Sheets para pagos | Si factura tiene RC o CE en Siigo, MR de Google Sheets se ignora completamente |
+| 18/03/2026 | f.total (con IVA) como unica fuente de valor | Elimina discrepancia ~19% entre calculos con/sin IVA en todo el sistema |
+| 18/03/2026 | Micro-saldos < $1,000 = pagados | Evita ruido de saldos residuales por redondeo o diferencias menores |
 
 ## Contexto critico
 - El repo en GitHub esta en `metrik360/lexia-facturacion`, no en `bi-metrik/`. Pendiente migrar.
 - `anioAnalisis` y `anioAnalisisFacturacion` son variables independientes. Cambiar ano en Facturacion NO afecta el PDF (que usa `anioAnalisis` de Analisis por Ano).
 - Las tablas CxC y Cartera Real del PDF estan ocultas con `${false && ...}`, no eliminadas. Se pueden reactivar.
+- `facturasProcessed.total` ahora es `f.total` (con IVA). El campo `totalNeto` existe pero es redundante (mismo valor). `valorBase` (qty*price) ya no se usa en ningun calculo visible.
+- Demo marca blanca en `/demo` usa misma API de Siigo sin auth. Datos reales pero nombres anonimizados en frontend.
 
 ## Notas para continuidad
 Al retomar este proyecto, revisar:

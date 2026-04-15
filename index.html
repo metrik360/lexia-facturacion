@@ -2706,13 +2706,20 @@
             }
         }
 
-        async function fetchPaginated(endpoint, pageSize = 100) {
+        async function fetchPaginated(endpoint, pageSize = 100, extraParams = {}) {
             let allResults = [];
             let page = 1;
             let hasMore = true;
+            let total = 0;
 
             // Limpiar endpoint (quitar /v1/ si viene)
             const cleanEndpoint = endpoint.replace('/v1/', '');
+
+            // Construir query string de parámetros extra (date_start, date_end, etc.)
+            const extraQuery = Object.entries(extraParams)
+                .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+                .join('&');
+            const extraSuffix = extraQuery ? `&${extraQuery}` : '';
 
             while (hasMore) {
                 let url;
@@ -2720,14 +2727,14 @@
 
                 if (isLocalServer) {
                     // Servidor local Node.js
-                    url = `${BASE_PATH}/api/${cleanEndpoint}?page=${page}&page_size=${pageSize}`;
+                    url = `${BASE_PATH}/api/${cleanEndpoint}?page=${page}&page_size=${pageSize}${extraSuffix}`;
                 } else if (isVercel) {
                     // Vercel serverless function - pasar paginación como parámetros separados
-                    url = `${BASE_PATH}/api/siigo?endpoint=${encodeURIComponent(cleanEndpoint)}&page=${page}&page_size=${pageSize}`;
+                    url = `${BASE_PATH}/api/siigo?endpoint=${encodeURIComponent(cleanEndpoint)}&page=${page}&page_size=${pageSize}${extraSuffix}`;
                     headers['Authorization'] = `Bearer ${accessToken}`;
                 } else {
                     // Directo a Siigo
-                    url = `https://api.siigo.com/v1/${cleanEndpoint}?page=${page}&page_size=${pageSize}`;
+                    url = `https://api.siigo.com/v1/${cleanEndpoint}?page=${page}&page_size=${pageSize}${extraSuffix}`;
                     headers['Authorization'] = `Bearer ${accessToken}`;
                     headers['Partner-Id'] = 'Empresa';
                 }
@@ -2737,10 +2744,17 @@
                 if (!response.ok) throw new Error(`Error fetching ${endpoint}`);
                 const data = await response.json();
 
-                allResults = allResults.concat(data.results || []);
+                const pageResults = data.results || [];
+                allResults = allResults.concat(pageResults);
 
-                const total = data.pagination?.total_results || 0;
-                hasMore = allResults.length < total;
+                const newTotal = data.pagination?.total_results || 0;
+                // Solo actualizar total si la API devuelve un valor positivo
+                // (evita salir temprano por respuestas vacías de rate limiting)
+                if (newTotal > 0) total = newTotal;
+                hasMore = total > 0 && allResults.length < total;
+
+                // Protección contra loops infinitos: si la página vino vacía, parar
+                if (pageResults.length === 0 && allResults.length > 0) hasMore = false;
                 page++;
 
                 if (endpoint.includes('invoices')) {
@@ -7791,14 +7805,19 @@
                     clientesMap[nit] = { nit, nombre: nombre || nit };
                 });
 
+                // Filtro de fecha: pedir datos desde hace 5 años para asegurar historial completo
+                // Sin este filtro, Siigo puede devolver fechas incorrectas para facturas de períodos cerrados
+                const startYear = new Date().getFullYear() - 5;
+                const dateFilter = { date_start: startYear + '-01-01' };
+
                 updateProgress(40, 'Cargando facturas...');
-                facturas = await fetchPaginated('/v1/invoices', 100);
+                facturas = await fetchPaginated('/v1/invoices', 100, dateFilter);
 
                 updateProgress(70, 'Cargando notas crédito...');
-                notasCredito = await fetchPaginated('/v1/credit-notes', 100);
+                notasCredito = await fetchPaginated('/v1/credit-notes', 100, dateFilter);
 
                 updateProgress(85, 'Cargando recibos de caja (pagos)...');
-                vouchers = await fetchPaginated('/v1/vouchers', 100);
+                vouchers = await fetchPaginated('/v1/vouchers', 100, dateFilter);
 
                 // Construir índice de pagos por factura
                 updateProgress(95, 'Procesando pagos...');
