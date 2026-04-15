@@ -3069,6 +3069,13 @@
             aplicarYRenderizar();
         }
 
+        // Calcular valor base de un documento (factura o NC) = sum(qty * price) sin IVA
+        function calcularValorBase(doc) {
+            return (doc.items || []).reduce((sum, item) => {
+                return sum + ((item.quantity || 0) * (item.price || 0));
+            }, 0);
+        }
+
         // Filtrar facturas solo por cliente y centro de costos (sin cierre de mes)
         // Calcular ventas mensuales NETAS por año
         // MISMA LÓGICA que calcularVentasMensualesConciliacion pero para múltiples años
@@ -3104,11 +3111,9 @@
                     if (lineaFactura !== filtros.lineaNegocio) return;
                 }
 
-                // Obtener información de moneda de la factura
+                // Usar valor base (qty * price) sin IVA - coincide con contabilidad
                 const fCurrency = f.currency || null;
-
-                // Usar f.total (incluye IVA) - consistente con tablas de detalle
-                const totalFactura = convertirACOP(f.total || 0, fCurrency);
+                const totalFactura = convertirACOP(calcularValorBase(f), fCurrency);
 
                 ventasPorMesAnio[anio][mes].ventas += totalFactura;
             });
@@ -3131,9 +3136,9 @@
                     if (lineaNC !== filtros.lineaNegocio) return;
                 }
 
-                // Usar nc.total (incluye IVA) - consistente con tablas de detalle
+                // Usar valor base (qty * price) sin IVA - coincide con contabilidad
                 const ncCurrency = nc.currency || null;
-                const totalNC = convertirACOP(nc.total || 0, ncCurrency);
+                const totalNC = convertirACOP(calcularValorBase(nc), ncCurrency);
 
                 ventasPorMesAnio[anio][mes].nc += totalNC;
             });
@@ -3238,7 +3243,7 @@
 
                 if (aniosAnalisis.includes(anio)) {
                     const fCurrency = f.currency || null;
-                    const valorFactura = convertirACOP(f.total || 0, fCurrency);
+                    const valorFactura = convertirACOP(calcularValorBase(f), fCurrency);
                     ventasPorClienteAnio[nit].facturas[anio] += valorFactura;
                 }
 
@@ -3290,7 +3295,7 @@
 
                 if (aniosAnalisis.includes(anio)) {
                     const ncCurrency = nc.currency || null;
-                    const valorNC = convertirACOP(nc.total || 0, ncCurrency);
+                    const valorNC = convertirACOP(calcularValorBase(nc), ncCurrency);
                     ventasPorClienteAnio[nit].nc[anio] += valorNC;
                 }
             });
@@ -3487,7 +3492,7 @@
 
                 if (aniosAnalisis.includes(anio)) {
                     const fCurrency = f.currency || null;
-                    const valorFactura = convertirACOP(f.total || 0, fCurrency);
+                    const valorFactura = convertirACOP(calcularValorBase(f), fCurrency);
                     ventasPorCC[cc].facturas[anio] += valorFactura;
                 }
             });
@@ -3520,7 +3525,7 @@
 
                 if (aniosAnalisis.includes(anio)) {
                     const ncCurrency = nc.currency || null;
-                    const valorNC = convertirACOP(nc.total || 0, ncCurrency);
+                    const valorNC = convertirACOP(calcularValorBase(nc), ncCurrency);
                     ventasPorCC[cc].nc[anio] += valorNC;
                 }
             });
@@ -4864,9 +4869,9 @@
 
                 if (anioFactura === anioFiltro) {
                     if (!mesFiltro || mesFactura <= mesFiltro) {
-                        // Convertir a COP si es moneda extranjera
+                        // Usar valor base (qty * price) sin IVA
                         const fCurrency = f.currency || null;
-                        ventasFiltradas += convertirACOP(f.total || 0, fCurrency);
+                        ventasFiltradas += convertirACOP(calcularValorBase(f), fCurrency);
                         numFacturasFiltradas++;
                     }
                 }
@@ -4880,9 +4885,9 @@
 
                 if (anioNC === anioFiltro) {
                     if (!mesFiltro || mesNC <= mesFiltro) {
-                        // Convertir a COP si es moneda extranjera
+                        // Usar valor base (qty * price) sin IVA
                         const ncCurrency = nc.currency || null;
-                        ncFiltradas += convertirACOP(nc.total || 0, ncCurrency);
+                        ncFiltradas += convertirACOP(calcularValorBase(nc), ncCurrency);
                         numNCFiltradas++;
                     }
                 }
@@ -5295,7 +5300,7 @@
             };
             facturasDelPeriodo.forEach(f => {
                 const fCurrency = f.currency || null;
-                totalesFacturas.valorBruto += convertirACOP(f.total || 0, fCurrency);
+                totalesFacturas.valorBruto += convertirACOP(calcularValorBase(f), fCurrency);
             });
 
             // Calcular totales generales de notas crédito
@@ -5305,7 +5310,7 @@
             };
             notasCreditoDelPeriodo.forEach(nc => {
                 const ncCurrency = nc.currency || null;
-                totalesNC.valorBruto += convertirACOP(nc.total || 0, ncCurrency);
+                totalesNC.valorBruto += convertirACOP(calcularValorBase(nc), ncCurrency);
             });
 
             // Calcular totales generales netos
@@ -6800,9 +6805,9 @@
                         if (lineaFactura !== filtros.lineaNegocio) return;
                     }
 
-                    // Usar f.total (incluye IVA) - consistente con tablas de detalle
+                    // Usar valor base (qty * price) sin IVA - coincide con contabilidad
                     const fCurrency = f.currency || null;
-                    const totalFactura = convertirACOP(f.total || 0, fCurrency);
+                    const totalFactura = convertirACOP(calcularValorBase(f), fCurrency);
 
                     ventasPorMes[mes].ventas += totalFactura;
                     ventasPorMes[mes].facturas += 1;
@@ -6826,9 +6831,9 @@
                         if (lineaNC !== filtros.lineaNegocio) return;
                     }
 
-                    // Usar nc.total (incluye IVA) - consistente con tablas de detalle
+                    // Usar valor base (qty * price) sin IVA - coincide con contabilidad
                     const ncCurrency = nc.currency || null;
-                    const totalNC = convertirACOP(nc.total || 0, ncCurrency);
+                    const totalNC = convertirACOP(calcularValorBase(nc), ncCurrency);
 
                     ventasPorMes[mes].nc += totalNC;
                     ventasPorMes[mes].notasCredito += 1;
@@ -8017,7 +8022,7 @@
                     const nit = f.customer?.identification || 'N/A';
                     const nombreCliente = clientesMap[nit]?.nombre || f.customer?.name || nit;
                     const fCurrency = f.currency || null;
-                    const totalFactura = convertirACOP(f.total || 0, fCurrency);
+                    const totalFactura = convertirACOP(calcularValorBase(f), fCurrency);
 
                     if (!ventasPorClienteAnio[nit]) {
                         ventasPorClienteAnio[nit] = { nit, nombre: nombreCliente, anios: {} };
@@ -8041,7 +8046,7 @@
 
                     const nit = nc.customer?.identification || 'N/A';
                     const ncCurrency = nc.currency || null;
-                    const totalNC = convertirACOP(nc.total || 0, ncCurrency);
+                    const totalNC = convertirACOP(calcularValorBase(nc), ncCurrency);
 
                     if (ventasPorClienteAnio[nit]) {
                         ventasPorClienteAnio[nit].anios[anio] -= totalNC;
@@ -8078,7 +8083,7 @@
 
                     const cc = LINEAS_NEGOCIO[f.cost_center] || 'Sin asignar';
                     const fCurrency = f.currency || null;
-                    const totalFactura = convertirACOP(f.total || 0, fCurrency);
+                    const totalFactura = convertirACOP(calcularValorBase(f), fCurrency);
 
                     if (!ventasPorCCAnio[cc]) {
                         ventasPorCCAnio[cc] = { nombre: cc, anios: {} };
@@ -8102,7 +8107,7 @@
 
                     const cc = LINEAS_NEGOCIO[nc.cost_center] || 'Sin asignar';
                     const ncCurrency = nc.currency || null;
-                    const totalNC = convertirACOP(nc.total || 0, ncCurrency);
+                    const totalNC = convertirACOP(calcularValorBase(nc), ncCurrency);
 
                     if (ventasPorCCAnio[cc]) {
                         ventasPorCCAnio[cc].anios[anio] -= totalNC;
