@@ -8,12 +8,15 @@
       ]
     }
   ],
-  "rewrites": [
+  "redirects": [
     {
       "source": "/",
       "destination": "/index-junta.html",
+      "permanent": false,
       "has": [{ "type": "host", "value": "junta-lexia.metrik.com.co" }]
-    },
+    }
+  ],
+  "rewrites": [
     { "source": "/demo", "destination": "/demo.html" },
     { "source": "/lexia/api/(.*)", "destination": "/api/$1" },
     { "source": "/lexia/assets/(.*)", "destination": "/assets/$1" },
