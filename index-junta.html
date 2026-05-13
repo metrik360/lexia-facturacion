@@ -3088,29 +3088,51 @@
             aplicarYRenderizar();
         }
 
-        // Drill in: enfocar un solo año (vista detalle mes a mes)
+        // Cambiar modo de gráficas (anual / comparativo / detalle)
+        function cambiarModoGraficos(modo) {
+            if (!['anual', 'comparativo', 'detalle'].includes(modo)) return;
+
+            // Si salimos de detalle, restaurar la selección comparativa previa
+            if (modoGraficos === 'detalle' && modo !== 'detalle') {
+                if (aniosComparativoPrevio.length > 0) {
+                    aniosSeleccionadosGraficos = [...aniosComparativoPrevio];
+                } else {
+                    aniosSeleccionadosGraficos = aniosDisponiblesVentas.slice(-3);
+                }
+                anioDrillIn = null;
+            }
+
+            // Si entramos a detalle sin año específico, tomar el último disponible
+            if (modo === 'detalle' && !anioDrillIn) {
+                const ultimoAnio = aniosDisponiblesVentas[aniosDisponiblesVentas.length - 1] || new Date().getFullYear();
+                if (modoGraficos !== 'detalle') {
+                    aniosComparativoPrevio = [...aniosSeleccionadosGraficos];
+                }
+                anioDrillIn = ultimoAnio;
+                aniosSeleccionadosGraficos = [ultimoAnio];
+            }
+
+            modoGraficos = modo;
+            aplicarYRenderizar();
+        }
+
+        // Drill in a un año específico (entra a modo 'detalle' con ese año)
         function entrarDrillInGraficos(anio) {
             anio = parseInt(anio);
             if (!anio) return;
-            // Guardar selección comparativa previa solo la primera vez
-            if (vistaGraficosDrill === 'comparativo') {
+            // Guardar selección comparativa previa solo si no estábamos ya en detalle
+            if (modoGraficos !== 'detalle') {
                 aniosComparativoPrevio = [...aniosSeleccionadosGraficos];
             }
-            vistaGraficosDrill = anio;
+            modoGraficos = 'detalle';
+            anioDrillIn = anio;
             aniosSeleccionadosGraficos = [anio];
             aplicarYRenderizar();
         }
 
-        // Drill out: volver a vista comparativa
+        // Drill out: volver al modo comparativo mensual
         function salirDrillOutGraficos() {
-            vistaGraficosDrill = 'comparativo';
-            if (aniosComparativoPrevio.length > 0) {
-                aniosSeleccionadosGraficos = [...aniosComparativoPrevio];
-            } else {
-                // Fallback: últimos 3 años disponibles
-                aniosSeleccionadosGraficos = aniosDisponiblesVentas.slice(-3);
-            }
-            aplicarYRenderizar();
+            cambiarModoGraficos('comparativo');
         }
 
         // Calcular valor base de un documento (factura o NC) = sum(qty * price) sin IVA
@@ -3228,8 +3250,10 @@
         // Variables para selector de años en gráficos de Resumen
         let aniosDisponiblesVentas = [];
         let aniosSeleccionadosGraficos = [];
-        // Drill in/out en gráficas de Resumen: 'comparativo' (default) o un año específico (number)
-        let vistaGraficosDrill = 'comparativo';
+        // Modo de visualización de gráficas Resumen: 'anual' (default, totales por año) | 'comparativo' (mensual multi-año) | 'detalle' (un solo año mes a mes)
+        let modoGraficos = 'anual';
+        // Cuando modoGraficos === 'detalle', año específico en foco
+        let anioDrillIn = null;
         // Memoria de selección comparativa previa al entrar a drill in
         let aniosComparativoPrevio = [];
 
@@ -5051,118 +5075,95 @@
                     </div>
                 </div>
 
-                <!-- Selector de Años / Drill in-out -->
+                <!-- Selector de modo + años -->
                 <div class="section" style="padding: 16px 20px; background: white; border-radius: 8px; margin-bottom: 16px;">
-                    ${vistaGraficosDrill === 'comparativo' ? `
-                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-                            <div style="font-weight: 600; color: var(--gris-oscuro);">Vista comparativa · años:</div>
-                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                ${aniosDisponiblesVentas.map(anio => `
+                    <!-- Toggle de 3 modos -->
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <span style="font-weight: 600; color: var(--gris-oscuro); margin-right: 8px;">Modo de vista:</span>
+                        ${[
+                            { id: 'anual', label: 'Anual', subtitulo: 'Totales por año' },
+                            { id: 'comparativo', label: 'Mensual comparativo', subtitulo: 'Mes a mes, varios años' },
+                            { id: 'detalle', label: 'Detalle por año', subtitulo: 'Un año, mes a mes' }
+                        ].map(m => `
+                            <button
+                                onclick="cambiarModoGraficos('${m.id}')"
+                                title="${m.subtitulo}"
+                                style="
+                                    padding: 8px 16px;
+                                    border-radius: 6px;
+                                    border: 2px solid ${modoGraficos === m.id ? 'var(--teal-principal)' : 'var(--gris-claro)'};
+                                    background: ${modoGraficos === m.id ? 'var(--teal-principal)' : 'white'};
+                                    color: ${modoGraficos === m.id ? 'white' : 'var(--gris-oscuro)'};
+                                    font-weight: 600;
+                                    font-size: 13px;
+                                    cursor: pointer;
+                                    transition: all 0.2s;
+                                "
+                            >${m.label}</button>
+                        `).join('')}
+                    </div>
+
+                    <!-- Selector de años (siempre visible, activo en los 3 modos) -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--gris-claro);">
+                        <div style="font-weight: 600; color: var(--gris-oscuro);">
+                            ${modoGraficos === 'detalle' ? 'Año en detalle:' : 'Años a comparar:'}
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            ${aniosDisponiblesVentas.map(anio => {
+                                const seleccionado = aniosSeleccionadosGraficos.includes(anio);
+                                const handler = modoGraficos === 'detalle' ? `entrarDrillInGraficos(${anio})` : `toggleAnioGrafico(${anio})`;
+                                return `
                                     <button
-                                        onclick="toggleAnioGrafico(${anio})"
-                                        title="Click para incluir/excluir del comparativo"
+                                        onclick="${handler}"
                                         style="
                                             padding: 6px 14px;
                                             border-radius: 6px;
-                                            border: 2px solid ${aniosSeleccionadosGraficos.includes(anio) ? 'var(--teal-principal)' : 'var(--gris-claro)'};
-                                            background: ${aniosSeleccionadosGraficos.includes(anio) ? 'var(--teal-principal)' : 'white'};
-                                            color: ${aniosSeleccionadosGraficos.includes(anio) ? 'white' : 'var(--gris-oscuro)'};
+                                            border: 2px solid ${seleccionado ? 'var(--teal-principal)' : 'var(--gris-claro)'};
+                                            background: ${seleccionado ? 'var(--teal-principal)' : 'white'};
+                                            color: ${seleccionado ? 'white' : 'var(--gris-oscuro)'};
                                             font-weight: 600;
                                             font-size: 13px;
                                             cursor: pointer;
                                             transition: all 0.2s;
                                         "
                                     >${anio}</button>
-                                `).join('')}
-                            </div>
-                            <div style="font-size: 12px; color: var(--gris-medio);">
-                                ${aniosSeleccionadosGraficos.length} año(s) seleccionado(s)
-                            </div>
+                                `;
+                            }).join('')}
                         </div>
-                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--gris-claro); flex-wrap: wrap;">
-                            <span style="font-size: 13px; color: var(--gris-medio);">Ver detalle mes a mes de:</span>
-                            ${aniosDisponiblesVentas.slice(-5).reverse().map(anio => `
-                                <button
-                                    onclick="entrarDrillInGraficos(${anio})"
-                                    style="
-                                        padding: 5px 12px;
-                                        border-radius: 6px;
-                                        border: 1px solid var(--teal-principal);
-                                        background: white;
-                                        color: var(--teal-principal);
-                                        font-weight: 600;
-                                        font-size: 12px;
-                                        cursor: pointer;
-                                        transition: all 0.2s;
-                                    "
-                                    onmouseover="this.style.background='var(--teal-principal)'; this.style.color='white';"
-                                    onmouseout="this.style.background='white'; this.style.color='var(--teal-principal)';"
-                                >${anio} →</button>
-                            `).join('')}
+                        <div style="font-size: 12px; color: var(--gris-medio);">
+                            ${modoGraficos === 'detalle' ? `Año: ${anioDrillIn || aniosSeleccionadosGraficos[0]}` : `${aniosSeleccionadosGraficos.length} año(s) seleccionado(s)`}
                         </div>
-                    ` : `
-                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <button
-                                    onclick="salirDrillOutGraficos()"
-                                    style="
-                                        padding: 8px 16px;
-                                        border-radius: 6px;
-                                        border: 2px solid var(--teal-principal);
-                                        background: white;
-                                        color: var(--teal-principal);
-                                        font-weight: 600;
-                                        font-size: 13px;
-                                        cursor: pointer;
-                                        transition: all 0.2s;
-                                    "
-                                    onmouseover="this.style.background='var(--teal-principal)'; this.style.color='white';"
-                                    onmouseout="this.style.background='white'; this.style.color='var(--teal-principal)';"
-                                >← Volver al comparativo</button>
-                                <span style="font-weight: 700; color: var(--gris-oscuro); font-size: 16px;">
-                                    Detalle mes a mes · <span style="color: var(--teal-principal);">${vistaGraficosDrill}</span>
-                                </span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                                <span style="font-size: 12px; color: var(--gris-medio);">Cambiar a:</span>
-                                ${aniosDisponiblesVentas.filter(a => a !== vistaGraficosDrill).slice(-4).map(anio => `
-                                    <button
-                                        onclick="entrarDrillInGraficos(${anio})"
-                                        style="
-                                            padding: 4px 10px;
-                                            border-radius: 4px;
-                                            border: 1px solid var(--gris-claro);
-                                            background: white;
-                                            color: var(--gris-oscuro);
-                                            font-weight: 600;
-                                            font-size: 12px;
-                                            cursor: pointer;
-                                        "
-                                    >${anio}</button>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `}
+                    </div>
                 </div>
 
-                <!-- Gráfico de Ventas Mensuales -->
-                <div class="section sales-chart">
-                    <h2 class="section-title">
-                        Ventas Mensuales Netas ${mesFiltro ? `(hasta ${MESES[mesFiltro - 1]})` : ''}
-                        <span class="chart-subtitle">${vistaGraficosDrill === 'comparativo' ? 'Comparativo año a año (Ventas - Notas Crédito)' : `Detalle mes a mes ${vistaGraficosDrill} (Ventas - Notas Crédito)`}</span>
-                    </h2>
-                    ${renderGraficoVentasMensuales(ventasFiltradoMes)}
-                </div>
+                ${modoGraficos === 'anual' ? `
+                    <!-- Gráfico de Ventas Anuales -->
+                    <div class="section sales-chart">
+                        <h2 class="section-title">
+                            Ventas Anuales Netas
+                            <span class="chart-subtitle">Total por año (Ventas - Notas Crédito)</span>
+                        </h2>
+                        ${renderGraficoVentasAnuales(ventasFiltradoMes)}
+                    </div>
+                ` : `
+                    <!-- Gráfico de Ventas Mensuales -->
+                    <div class="section sales-chart">
+                        <h2 class="section-title">
+                            Ventas Mensuales Netas ${mesFiltro ? `(hasta ${MESES[mesFiltro - 1]})` : ''}
+                            <span class="chart-subtitle">${modoGraficos === 'comparativo' ? 'Comparativo año a año (Ventas - Notas Crédito)' : `Detalle mes a mes ${anioDrillIn || ''} (Ventas - Notas Crédito)`}</span>
+                        </h2>
+                        ${renderGraficoVentasMensuales(ventasFiltradoMes)}
+                    </div>
 
-                <!-- Gráfico de Ventas YTD -->
-                <div class="section sales-chart">
-                    <h2 class="section-title">
-                        Ventas Acumuladas (YTD) ${mesFiltro ? `(hasta ${MESES[mesFiltro - 1]})` : ''}
-                        <span class="chart-subtitle">${vistaGraficosDrill === 'comparativo' ? 'Comparativo año a año (Rendimiento Acumulado)' : `Acumulado mensual ${vistaGraficosDrill}`}</span>
-                    </h2>
-                    ${renderGraficoVentasYTD(ventasYTDFiltrado)}
-                </div>
-
+                    <!-- Gráfico de Ventas YTD -->
+                    <div class="section sales-chart">
+                        <h2 class="section-title">
+                            Ventas Acumuladas (YTD) ${mesFiltro ? `(hasta ${MESES[mesFiltro - 1]})` : ''}
+                            <span class="chart-subtitle">${modoGraficos === 'comparativo' ? 'Comparativo año a año (Rendimiento Acumulado)' : `Acumulado mensual ${anioDrillIn || ''}`}</span>
+                        </h2>
+                        ${renderGraficoVentasYTD(ventasYTDFiltrado)}
+                    </div>
+                `}
             `;
         }
 
@@ -7395,6 +7396,75 @@
                         </tbody>
                     </table>
                 </div>
+            `;
+        }
+
+        function renderGraficoVentasAnuales(ventasPorMesAnio) {
+            const aniosParaGrafico = aniosSeleccionadosGraficos.length > 0 ? aniosSeleccionadosGraficos : [new Date().getFullYear()];
+
+            // Calcular total anual por año (suma de los 12 meses)
+            const totalesAnuales = {};
+            aniosParaGrafico.forEach(anio => {
+                let total = 0;
+                for (let mes = 1; mes <= 12; mes++) {
+                    total += ventasPorMesAnio[anio]?.[mes]?.neto || 0;
+                }
+                totalesAnuales[anio] = total;
+            });
+
+            const maxValor = Math.max(...Object.values(totalesAnuales), 0);
+
+            if (maxValor === 0) {
+                return '<p style="text-align: center; color: var(--gris-medio); padding: 20px;">No hay datos de ventas para mostrar</p>';
+            }
+
+            const escalaY = [maxValor, maxValor * 0.75, maxValor * 0.5, maxValor * 0.25, 0];
+
+            // Una "columna" por año (en vez de por mes). Reutiliza .chart-month-group como contenedor por año.
+            const barsHTML = aniosParaGrafico.map(anio => {
+                const valor = totalesAnuales[anio] || 0;
+                const altura = maxValor > 0 ? (Math.max(0, valor) / maxValor) * 180 : 0;
+                const etiqueta = formatCompacto(valor);
+                const valorCompleto = formatCompleto(valor);
+                const tooltipText = `Año ${anio}: ${valorCompleto}`;
+                return `
+                    <div class="chart-month-group">
+                        <div class="chart-bars-container">
+                            <div class="chart-bar year-${anio}"
+                                 style="height: ${altura}px; min-width: 48px;"
+                                 data-tooltip="${tooltipText}">
+                                ${valor > 0 ? `<span class="chart-bar-label">${etiqueta}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="chart-month-label" style="font-weight: 700;">${anio}</div>
+                    </div>
+                `;
+            }).join('');
+
+            const legendHTML = aniosParaGrafico.map(anio =>
+                `<div class="chart-legend-item">
+                    <div class="chart-legend-color year-${anio}"></div>
+                    <span>${anio}: ${formatCompleto(totalesAnuales[anio] || 0)}</span>
+                </div>`
+            ).join('');
+
+            return `
+                <div class="chart-wrapper">
+                    <div class="chart-y-axis">
+                        ${escalaY.map(v => `<span>${formatMillones(v)}</span>`).join('')}
+                    </div>
+                    <div class="chart-grid">
+                        <div class="chart-grid-lines">
+                            <div class="chart-grid-line"></div>
+                            <div class="chart-grid-line"></div>
+                            <div class="chart-grid-line"></div>
+                            <div class="chart-grid-line"></div>
+                            <div class="chart-grid-line"></div>
+                        </div>
+                        <div class="chart-months-row" style="justify-content: space-around;">${barsHTML}</div>
+                    </div>
+                </div>
+                <div class="chart-legend">${legendHTML}</div>
             `;
         }
 
