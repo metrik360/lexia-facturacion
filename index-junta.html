@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Cartera - Lexia Abogados</title>
+    <title>Dashboard Junta - Lexia Abogados</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap">
@@ -1887,7 +1887,7 @@
     <div id="loginOverlay" class="login-overlay">
         <div class="login-container">
             <img src="/assets/logo-lexia.png" alt="Lexia Abogados" class="login-logo">
-            <h1 class="login-title">Dashboard de Cartera</h1>
+            <h1 class="login-title">Dashboard de Resultados</h1>
             <p class="login-subtitle">Ingresa tus credenciales para continuar</p>
 
             <form class="login-form" id="loginForm" onsubmit="handleLogin(event)">
@@ -1907,7 +1907,7 @@
             <div class="login-error" id="loginError"></div>
 
             <div class="login-footer">
-                Lexia Abogados &copy; 2024 | Sistema de Gestión de Cartera
+                Lexia Abogados &copy; 2024 | Sistema de Gestión de Resultados
             </div>
         </div>
     </div>
@@ -1918,7 +1918,7 @@
         <header class="header">
             <div class="header-left">
                 <img id="headerLogo" src="/assets/logo-lexia.png" alt="Lexia" class="logo">
-                <span class="header-title">Dashboard de Cartera</span>
+                <span class="header-title">Dashboard de Resultados</span>
             </div>
             <div style="display: flex; gap: 12px; align-items: center;">
                 <span id="userDisplay" style="color: var(--verde-menta); font-size: 13px;"></span>
@@ -3088,6 +3088,31 @@
             aplicarYRenderizar();
         }
 
+        // Drill in: enfocar un solo año (vista detalle mes a mes)
+        function entrarDrillInGraficos(anio) {
+            anio = parseInt(anio);
+            if (!anio) return;
+            // Guardar selección comparativa previa solo la primera vez
+            if (vistaGraficosDrill === 'comparativo') {
+                aniosComparativoPrevio = [...aniosSeleccionadosGraficos];
+            }
+            vistaGraficosDrill = anio;
+            aniosSeleccionadosGraficos = [anio];
+            aplicarYRenderizar();
+        }
+
+        // Drill out: volver a vista comparativa
+        function salirDrillOutGraficos() {
+            vistaGraficosDrill = 'comparativo';
+            if (aniosComparativoPrevio.length > 0) {
+                aniosSeleccionadosGraficos = [...aniosComparativoPrevio];
+            } else {
+                // Fallback: últimos 3 años disponibles
+                aniosSeleccionadosGraficos = aniosDisponiblesVentas.slice(-3);
+            }
+            aplicarYRenderizar();
+        }
+
         // Calcular valor base de un documento (factura o NC) = sum(qty * price) sin IVA
         function calcularValorBase(doc) {
             return (doc.items || []).reduce((sum, item) => {
@@ -3203,6 +3228,10 @@
         // Variables para selector de años en gráficos de Resumen
         let aniosDisponiblesVentas = [];
         let aniosSeleccionadosGraficos = [];
+        // Drill in/out en gráficas de Resumen: 'comparativo' (default) o un año específico (number)
+        let vistaGraficosDrill = 'comparativo';
+        // Memoria de selección comparativa previa al entrar a drill in
+        let aniosComparativoPrevio = [];
 
         function clasificarClientesConVentas() {
             // Usar el año de análisis de facturación (configurable)
@@ -4773,9 +4802,6 @@
                     <button class="tab-btn ${tabActiva === 'conciliacion' ? 'active' : ''}" onclick="cambiarTab('conciliacion')">
                         Análisis por Año
                     </button>
-                    <button class="tab-btn ${tabActiva === 'cuentasPorCobrar' ? 'active' : ''}" onclick="cambiarTab('cuentasPorCobrar')">
-                        Cuentas por Cobrar
-                    </button>
                     <button class="tab-btn ${tabActiva === 'masMetrik' ? 'active' : ''}" onclick="cambiarTab('masMetrik')">
                         Más con MéTRIK
                     </button>
@@ -4985,35 +5011,6 @@
                 ? `${MESES[mesFiltro - 1]} ${anioFiltro}`
                 : `Año ${anioFiltro}`;
 
-            // Calcular cartera crítica según horizonte seleccionado
-            let carteraCritica = 0;
-            let facturasCriticas = 0;
-            if (horizonteCritico === 60) {
-                carteraCritica = kpis.carteraPorHorizonte['61-90'] + kpis.carteraPorHorizonte['91-120'] + kpis.carteraPorHorizonte['>120'];
-                facturasCriticas = facturasProcessed.filter(f => f.dias > 60).length;
-            } else if (horizonteCritico === 90) {
-                carteraCritica = kpis.carteraPorHorizonte['91-120'] + kpis.carteraPorHorizonte['>120'];
-                facturasCriticas = facturasProcessed.filter(f => f.dias > 90).length;
-            } else {
-                carteraCritica = kpis.carteraPorHorizonte['>120'];
-                facturasCriticas = facturasProcessed.filter(f => f.dias > 120).length;
-            }
-
-            // Calcular conteo de facturas por horizonte
-            const facturasPorHorizonte = {
-                'porVencer': facturasProcessed.filter(f => f.dias < 0).length,
-                '0-30': facturasProcessed.filter(f => f.horizonte === '0-30').length,
-                '31-60': facturasProcessed.filter(f => f.horizonte === '31-60').length,
-                '61-90': facturasProcessed.filter(f => f.horizonte === '61-90').length,
-                '91-120': facturasProcessed.filter(f => f.horizonte === '91-120').length,
-                '>120': facturasProcessed.filter(f => f.horizonte === '>120').length
-            };
-
-            // Calcular saldo por vencer (facturas con días negativos o balance con due_date futuro)
-            const saldoPorVencer = facturasProcessed
-                .filter(f => f.dias < 0)
-                .reduce((sum, f) => sum + f.balance, 0);
-
             // Inicializar años disponibles si no se ha hecho
             if (aniosDisponiblesVentas.length === 0) {
                 inicializarAniosSeleccionados();
@@ -5045,95 +5042,114 @@
             });
 
             return `
-                <!-- KPIs Principales -->
-                <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
-                    <div class="kpi-card">
+                <!-- KPI Principal -->
+                <div class="kpi-grid" style="grid-template-columns: 1fr; max-width: 480px; margin: 0 auto 16px auto;">
+                    <div class="kpi-card" style="text-align: center;">
                         <div class="kpi-label">Venta Total Neta</div>
                         <div class="kpi-value" style="color: var(--verde-vibrante);">${formatCurrency(ventaNetaFiltrada)}</div>
                         <div class="kpi-subtitle">${numFacturasFiltradas} facturas - ${numNCFiltradas} NC | ${etiquetaPeriodo}</div>
                     </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">Cartera Pendiente (SIIGO)</div>
-                        <div class="kpi-value">${formatCurrency(kpis.carteraPendiente)}</div>
-                        <div class="kpi-subtitle">${kpis.totalFacturas} facturas pendientes</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label" style="display: flex; align-items: center; gap: 8px;">
-                            Cartera Crítica
-                            <select onchange="cambiarHorizonteCritico(this.value)"
-                                    style="padding: 2px 8px; font-size: 12px; border-radius: 4px; border: 1px solid var(--gris-claro); background: white; cursor: pointer;">
-                                <option value="60" ${horizonteCritico === 60 ? 'selected' : ''}>+60 días</option>
-                                <option value="90" ${horizonteCritico === 90 ? 'selected' : ''}>+90 días</option>
-                                <option value="120" ${horizonteCritico === 120 ? 'selected' : ''}>+120 días</option>
-                            </select>
-                        </div>
-                        <div class="kpi-value danger">${formatCurrency(carteraCritica)}</div>
-                        <div class="kpi-subtitle">${facturasCriticas} facturas | Mayor riesgo de incobrabilidad</div>
-                    </div>
                 </div>
 
-                <!-- KPIs Movimientos Bancarios (si hay datos) -->
-                ${kpis.movimientos && kpis.movimientos.total > 0 ? `
-                <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 16px;">
-                    <div class="kpi-card" style="border-left: 4px solid var(--verde-vibrante);">
-                        <div class="kpi-label">Cartera Real</div>
-                        <div class="kpi-value" style="color: var(--verde-vibrante);">${formatCurrency(kpis.carteraReal)}</div>
-                        <div class="kpi-subtitle">Ajustada por ingresos bancarios</div>
-                    </div>
-                    <div class="kpi-card" style="border-left: 4px solid var(--teal-principal); cursor: pointer; transition: box-shadow 0.2s;" onclick="mostrarDetalleMR()" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.12)'" onmouseout="this.style.boxShadow=''">
-                        <div class="kpi-label">Pagos con Factura (MR)</div>
-                        <div class="kpi-value" style="color: var(--teal-principal);">${formatCurrency(kpis.movimientos.conFactura.valor)}</div>
-                        <div class="kpi-subtitle">${kpis.movimientos.conFactura.cantidad} movimientos | Por registrar en SIIGO</div>
-                        <div style="text-align: right; margin-top: 4px; font-size: 11px; color: var(--teal-principal);">Ver detalle &#8250;</div>
-                    </div>
-                    <div class="kpi-card" style="border-left: 4px solid var(--amarillo); ${kpis.movimientos.sinIdentificar.cantidad > 0 ? 'cursor: pointer; transition: box-shadow 0.2s;' : ''}" ${kpis.movimientos.sinIdentificar.cantidad > 0 ? `onclick="mostrarDetalleSinIdentificar()" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.12)'" onmouseout="this.style.boxShadow=''"` : ''}>
-                        <div class="kpi-label">Pendiente por Identificar Factura</div>
-                        <div class="kpi-value" style="color: #b45309;">${formatCurrency(kpis.movimientos.sinIdentificar.valor)}</div>
-                        <div class="kpi-subtitle">${kpis.movimientos.sinIdentificar.cantidad} pagos | Cliente sin factura cruzada</div>
-                        ${kpis.movimientos.sinIdentificar.cantidad > 0 ? `<div style="text-align: right; margin-top: 4px; font-size: 11px; color: #b45309;">Ver detalle &#8250;</div>` : ''}
-                    </div>
-                    <div class="kpi-card" style="border-left: 4px solid var(--rojo); ${kpis.movimientos.alertasNIT > 0 ? 'cursor: pointer; transition: box-shadow 0.2s;' : ''}" ${kpis.movimientos.alertasNIT > 0 ? `onclick="mostrarAlertasNIT()" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.12)'" onmouseout="this.style.boxShadow=''"` : ''}>
-                        <div class="kpi-label">Pendiente por Identificar Cliente</div>
-                        <div class="kpi-value" style="color: var(--rojo);">${formatCurrency(kpis.movimientos.enLimbo.valor)}</div>
-                        <div class="kpi-subtitle">${kpis.movimientos.enLimbo.cantidad} pagos | Sin cliente identificado</div>
-                        ${kpis.movimientos.alertasNIT > 0 ? `<div style="text-align: right; margin-top: 4px; font-size: 11px; color: var(--rojo);">${kpis.movimientos.alertasNIT} NITs no encontrados &#8250;</div>` : ''}
-                    </div>
-                </div>
-                ` : ''}
-
-                <!-- Selector de Años para Gráficos -->
+                <!-- Selector de Años / Drill in-out -->
                 <div class="section" style="padding: 16px 20px; background: white; border-radius: 8px; margin-bottom: 16px;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-                        <div style="font-weight: 600; color: var(--gris-oscuro);">Años a comparar en gráficos:</div>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            ${aniosDisponiblesVentas.map(anio => `
+                    ${vistaGraficosDrill === 'comparativo' ? `
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                            <div style="font-weight: 600; color: var(--gris-oscuro);">Vista comparativa · años:</div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                ${aniosDisponiblesVentas.map(anio => `
+                                    <button
+                                        onclick="toggleAnioGrafico(${anio})"
+                                        title="Click para incluir/excluir del comparativo"
+                                        style="
+                                            padding: 6px 14px;
+                                            border-radius: 6px;
+                                            border: 2px solid ${aniosSeleccionadosGraficos.includes(anio) ? 'var(--teal-principal)' : 'var(--gris-claro)'};
+                                            background: ${aniosSeleccionadosGraficos.includes(anio) ? 'var(--teal-principal)' : 'white'};
+                                            color: ${aniosSeleccionadosGraficos.includes(anio) ? 'white' : 'var(--gris-oscuro)'};
+                                            font-weight: 600;
+                                            font-size: 13px;
+                                            cursor: pointer;
+                                            transition: all 0.2s;
+                                        "
+                                    >${anio}</button>
+                                `).join('')}
+                            </div>
+                            <div style="font-size: 12px; color: var(--gris-medio);">
+                                ${aniosSeleccionadosGraficos.length} año(s) seleccionado(s)
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--gris-claro); flex-wrap: wrap;">
+                            <span style="font-size: 13px; color: var(--gris-medio);">Ver detalle mes a mes de:</span>
+                            ${aniosDisponiblesVentas.slice(-5).reverse().map(anio => `
                                 <button
-                                    onclick="toggleAnioGrafico(${anio})"
+                                    onclick="entrarDrillInGraficos(${anio})"
                                     style="
-                                        padding: 6px 14px;
+                                        padding: 5px 12px;
                                         border-radius: 6px;
-                                        border: 2px solid ${aniosSeleccionadosGraficos.includes(anio) ? 'var(--teal-principal)' : 'var(--gris-claro)'};
-                                        background: ${aniosSeleccionadosGraficos.includes(anio) ? 'var(--teal-principal)' : 'white'};
-                                        color: ${aniosSeleccionadosGraficos.includes(anio) ? 'white' : 'var(--gris-oscuro)'};
+                                        border: 1px solid var(--teal-principal);
+                                        background: white;
+                                        color: var(--teal-principal);
+                                        font-weight: 600;
+                                        font-size: 12px;
+                                        cursor: pointer;
+                                        transition: all 0.2s;
+                                    "
+                                    onmouseover="this.style.background='var(--teal-principal)'; this.style.color='white';"
+                                    onmouseout="this.style.background='white'; this.style.color='var(--teal-principal)';"
+                                >${anio} →</button>
+                            `).join('')}
+                        </div>
+                    ` : `
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <button
+                                    onclick="salirDrillOutGraficos()"
+                                    style="
+                                        padding: 8px 16px;
+                                        border-radius: 6px;
+                                        border: 2px solid var(--teal-principal);
+                                        background: white;
+                                        color: var(--teal-principal);
                                         font-weight: 600;
                                         font-size: 13px;
                                         cursor: pointer;
                                         transition: all 0.2s;
                                     "
-                                >${anio}</button>
-                            `).join('')}
+                                    onmouseover="this.style.background='var(--teal-principal)'; this.style.color='white';"
+                                    onmouseout="this.style.background='white'; this.style.color='var(--teal-principal)';"
+                                >← Volver al comparativo</button>
+                                <span style="font-weight: 700; color: var(--gris-oscuro); font-size: 16px;">
+                                    Detalle mes a mes · <span style="color: var(--teal-principal);">${vistaGraficosDrill}</span>
+                                </span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                <span style="font-size: 12px; color: var(--gris-medio);">Cambiar a:</span>
+                                ${aniosDisponiblesVentas.filter(a => a !== vistaGraficosDrill).slice(-4).map(anio => `
+                                    <button
+                                        onclick="entrarDrillInGraficos(${anio})"
+                                        style="
+                                            padding: 4px 10px;
+                                            border-radius: 4px;
+                                            border: 1px solid var(--gris-claro);
+                                            background: white;
+                                            color: var(--gris-oscuro);
+                                            font-weight: 600;
+                                            font-size: 12px;
+                                            cursor: pointer;
+                                        "
+                                    >${anio}</button>
+                                `).join('')}
+                            </div>
                         </div>
-                        <div style="font-size: 12px; color: var(--gris-medio);">
-                            ${aniosSeleccionadosGraficos.length} año(s) seleccionado(s)
-                        </div>
-                    </div>
+                    `}
                 </div>
 
                 <!-- Gráfico de Ventas Mensuales -->
                 <div class="section sales-chart">
                     <h2 class="section-title">
                         Ventas Mensuales Netas ${mesFiltro ? `(hasta ${MESES[mesFiltro - 1]})` : ''}
-                        <span class="chart-subtitle">Comparativo año a año (Ventas - Notas Crédito)</span>
+                        <span class="chart-subtitle">${vistaGraficosDrill === 'comparativo' ? 'Comparativo año a año (Ventas - Notas Crédito)' : `Detalle mes a mes ${vistaGraficosDrill} (Ventas - Notas Crédito)`}</span>
                     </h2>
                     ${renderGraficoVentasMensuales(ventasFiltradoMes)}
                 </div>
@@ -5142,16 +5158,11 @@
                 <div class="section sales-chart">
                     <h2 class="section-title">
                         Ventas Acumuladas (YTD) ${mesFiltro ? `(hasta ${MESES[mesFiltro - 1]})` : ''}
-                        <span class="chart-subtitle">Comparativo año a año (Rendimiento Acumulado)</span>
+                        <span class="chart-subtitle">${vistaGraficosDrill === 'comparativo' ? 'Comparativo año a año (Rendimiento Acumulado)' : `Acumulado mensual ${vistaGraficosDrill}`}</span>
                     </h2>
                     ${renderGraficoVentasYTD(ventasYTDFiltrado)}
                 </div>
 
-                <!-- Powered by Métrik -->
-                <div class="powered-by-footer">
-                    <span>Powered by</span>
-                    <img src="https://i.ibb.co/sdb3Bpq5/M-trik-logo-iso.png" alt="Métrik" class="metrik-logo">
-                </div>
             `;
         }
 
@@ -5190,11 +5201,6 @@
                     </div>
                 </div>
 
-                <!-- Powered by Métrik -->
-                <div class="powered-by-footer">
-                    <span>Powered by</span>
-                    <img src="https://i.ibb.co/sdb3Bpq5/M-trik-logo-iso.png" alt="Métrik" class="metrik-logo">
-                </div>
             `;
         }
 
@@ -5650,11 +5656,6 @@
                 ` : '';
                 })()}
 
-                <!-- Powered by Métrik -->
-                <div class="powered-by-footer">
-                    <span>Powered by</span>
-                    <img src="https://i.ibb.co/sdb3Bpq5/M-trik-logo-iso.png" alt="Métrik" class="metrik-logo">
-                </div>
             `;
         }
 
@@ -6044,11 +6045,6 @@
                     </ul>
                 </div>
 
-                <!-- Powered by Métrik -->
-                <div class="powered-by-footer">
-                    <span>Powered by</span>
-                    <img src="https://i.ibb.co/sdb3Bpq5/M-trik-logo-iso.png" alt="Métrik" class="metrik-logo">
-                </div>
             `;
         }
 
@@ -6346,11 +6342,6 @@
                 <!-- Detalle de documentos del cliente seleccionado -->
                 <div id="cxcDetalleContainer"></div>
 
-                <!-- Powered by Métrik -->
-                <div class="powered-by-footer">
-                    <span>Powered by</span>
-                    <img src="https://i.ibb.co/sdb3Bpq5/M-trik-logo-iso.png" alt="Métrik" class="metrik-logo">
-                </div>
             `;
 
             // Renderizar detalle de documentos automáticamente
