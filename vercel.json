@@ -22,8 +22,5 @@
     { "source": "/lexia/assets/(.*)", "destination": "/assets/$1" },
     { "source": "/lexia", "destination": "/index.html" },
     { "source": "/lexia/(.*)", "destination": "/$1" }
-  ],
-  "crons": [
-    { "path": "/api/snapshot?action=refresh", "schedule": "0 11,19 * * *" }
   ]
 }

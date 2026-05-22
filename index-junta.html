@@ -7982,7 +7982,7 @@
                 // Vista junta consume snapshot precalculado (cron 2x/dia)
                 // en vez de pegarle directo a Siigo, para render sub-segundo
                 updateProgress(15, 'Obteniendo snapshot...');
-                const metaRes = await fetch('/api/snapshot?action=read');
+                const metaRes = await fetch('/api/snapshot');
                 if (!metaRes.ok) throw new Error('Snapshot no disponible. El cron aun no ha corrido.');
                 const meta = await metaRes.json();
                 if (!meta.url) throw new Error('Snapshot sin URL');

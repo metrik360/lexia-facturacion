@@ -1,0 +1,28 @@
+name: Snapshot Lexia Siigo
+
+on:
+  schedule:
+    # 6:00 AM hora Colombia (UTC-5) = 11:00 UTC
+    - cron: '0 11 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci --no-audit --no-fund
+
+      - name: Refresh snapshot
+        env:
+          SIIGO_USERNAME: ${{ secrets.SIIGO_USERNAME }}
+          SIIGO_ACCESS_KEY: ${{ secrets.SIIGO_ACCESS_KEY }}
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+        run: node scripts/refresh-snapshot.js
