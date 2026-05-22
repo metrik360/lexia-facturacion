@@ -7964,7 +7964,7 @@
             if (headerLogo) headerLogo.src = LOGO_URL;
 
             const btnRefresh = document.getElementById('btnRefresh');
-            btnRefresh.disabled = true;
+            if (btnRefresh) btnRefresh.disabled = true;
 
             document.getElementById('mainContent').innerHTML = `
                 <div class="loading" id="loading">
@@ -8024,7 +8024,7 @@
                 console.error('Error:', error);
                 renderError(error.message || 'Error al cargar datos. Verifica tu conexión.');
             } finally {
-                btnRefresh.disabled = false;
+                if (btnRefresh) btnRefresh.disabled = false;
             }
         }
 
