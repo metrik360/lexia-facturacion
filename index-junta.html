@@ -1921,6 +1921,7 @@
                 <span class="header-title">Dashboard de Resultados</span>
             </div>
             <div style="display: flex; gap: 12px; align-items: center;">
+                <span id="snapshotInfo" style="color: var(--verde-menta); font-size: 12px; opacity: 0.75;"></span>
                 <span id="userDisplay" style="color: var(--verde-menta); font-size: 13px;"></span>
                 <button class="btn-refresh" onclick="cerrarSesion()" style="background: transparent; border: 1px solid var(--verde-menta); color: var(--verde-menta);">
                     Salir
@@ -7969,7 +7970,7 @@
             document.getElementById('mainContent').innerHTML = `
                 <div class="loading" id="loading">
                     <div class="spinner"></div>
-                    <span>Cargando datos de Siigo...</span>
+                    <span>Cargando datos...</span>
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill" style="width: 0%"></div>
                     </div>
@@ -7978,40 +7979,48 @@
             `;
 
             try {
-                await autenticar();
+                // Vista junta consume snapshot precalculado (cron 2x/dia)
+                // en vez de pegarle directo a Siigo, para render sub-segundo
+                updateProgress(15, 'Obteniendo snapshot...');
+                const metaRes = await fetch('/api/snapshot?action=read');
+                if (!metaRes.ok) throw new Error('Snapshot no disponible. El cron aun no ha corrido.');
+                const meta = await metaRes.json();
+                if (!meta.url) throw new Error('Snapshot sin URL');
 
-                updateProgress(20, 'Cargando clientes...');
-                const clientesData = await fetchPaginated('/v1/customers', 100);
+                updateProgress(40, 'Descargando datos...');
+                const snapRes = await fetch(meta.url);
+                if (!snapRes.ok) throw new Error('Error descargando snapshot');
+                const snap = await snapRes.json();
 
-                clientesData.forEach(c => {
+                updateProgress(70, 'Indexando clientes...');
+                (snap.customers || []).forEach(c => {
                     const nit = c.identification;
                     const nombre = Array.isArray(c.name) ? c.name.join(' ') : c.name;
                     clientesMap[nit] = { nit, nombre: nombre || nit };
                 });
 
-                // Filtro de fecha: pedir datos desde hace 5 años para asegurar historial completo
-                // Sin este filtro, Siigo puede devolver fechas incorrectas para facturas de períodos cerrados
-                const startYear = new Date().getFullYear() - 5;
-                const dateFilter = { date_start: startYear + '-01-01' };
+                facturas = snap.invoices || [];
+                notasCredito = snap.creditNotes || [];
+                vouchers = snap.vouchers || [];
 
-                updateProgress(40, 'Cargando facturas...');
-                facturas = await fetchPaginated('/v1/invoices', 100, dateFilter);
-
-                updateProgress(70, 'Cargando notas crédito...');
-                notasCredito = await fetchPaginated('/v1/credit-notes', 100, dateFilter);
-
-                updateProgress(85, 'Cargando recibos de caja (pagos)...');
-                vouchers = await fetchPaginated('/v1/vouchers', 100, dateFilter);
-
-                // Construir índice de pagos por factura
-                updateProgress(95, 'Procesando pagos...');
+                updateProgress(85, 'Procesando pagos...');
                 pagosPorFactura = construirIndicePagos(vouchers);
-
                 facturasProcessed = procesarDatos();
 
-                // Cargar movimientos bancarios (Excel)
-                updateProgress(97, 'Cargando movimientos bancarios...');
+                updateProgress(92, 'Cargando movimientos bancarios...');
                 await cargarMovimientosBancarios();
+
+                // Mostrar timestamp del snapshot en el header
+                const snapEl = document.getElementById('snapshotInfo');
+                if (snapEl && snap.generatedAt) {
+                    const d = new Date(snap.generatedAt);
+                    const fmt = d.toLocaleString('es-CO', {
+                        timeZone: 'America/Bogota',
+                        day: '2-digit', month: 'short',
+                        hour: '2-digit', minute: '2-digit', hour12: false
+                    });
+                    snapEl.textContent = `Datos: ${fmt}`;
+                }
 
                 const opciones = obtenerOpcionesFiltros(facturasProcessed);
                 const facturasFiltradas = aplicarFiltros(facturasProcessed);
