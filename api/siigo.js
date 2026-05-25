@@ -11,22 +11,29 @@ export default async function handler(req, res) {
         return res.status(200).end();
     }
 
-    const { endpoint, username, access_key, page, page_size, ...extraParams } = req.query;
+    const { endpoint, page, page_size, ...extraParams } = req.query;
 
     if (!endpoint) {
         return res.status(400).json({ error: 'Endpoint requerido' });
     }
 
+    // Credenciales viven solo en el server (env vars Vercel)
+    const username = process.env.SIIGO_USERNAME;
+    const accessKey = process.env.SIIGO_ACCESS_KEY;
+
     try {
-        // Si se proporcionan credenciales, obtener token
         let token = req.headers.authorization?.replace('Bearer ', '');
 
-        if (username && access_key && !token) {
+        if (!token) {
+            if (!username || !accessKey) {
+                return res.status(500).json({ error: 'Credenciales Siigo no configuradas en el servidor' });
+            }
+
             // Autenticación con Siigo
             const authResponse = await fetch('https://api.siigo.com/auth', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, access_key })
+                body: JSON.stringify({ username, access_key: accessKey })
             });
 
             if (!authResponse.ok) {
@@ -44,10 +51,6 @@ export default async function handler(req, res) {
             if (endpoint === 'auth') {
                 return res.status(200).json(authData);
             }
-        }
-
-        if (!token) {
-            return res.status(401).json({ error: 'Token de autorización requerido' });
         }
 
         // Construir URL de Siigo con parámetros de paginación y filtros adicionales
