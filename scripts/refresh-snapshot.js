@@ -7,6 +7,8 @@
 //   BLOB_READ_WRITE_TOKEN   (token de Vercel Blob, mismo que usa el endpoint api/snapshot)
 
 import { put } from '@vercel/blob';
+import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
 const BLOB_KEY = 'lexia/snapshot.json';
 
@@ -29,6 +31,39 @@ async function autenticarSiigo() {
     return data.access_token;
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Siigo devuelve 5xx/429 transitorios de forma intermitente (ej: 500 unhandled_error,
+// 503 product_service unavailable, 429 throttling). Como el cron corre 1x/dia, un hipo
+// momentaneo botaba el snapshot del dia entero. Reintentamos la misma pagina con backoff
+// exponencial antes de rendirnos. Solo reintenta errores transitorios; 4xx reales (auth,
+// not found) fallan de inmediato.
+async function fetchPaginaConRetry(url, token, etiqueta, maxIntentos = 4) {
+    let ultimoError;
+    for (let intento = 1; intento <= maxIntentos; intento++) {
+        const r = await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Partner-Id': 'Empresa',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (r.ok) return r;
+
+        const txt = await r.text();
+        const transitorio = r.status >= 500 || r.status === 429;
+        ultimoError = new Error(`${etiqueta} failed: ${r.status} ${txt.slice(0, 300)}`);
+
+        if (!transitorio || intento === maxIntentos) throw ultimoError;
+
+        const esperaMs = 1000 * 2 ** (intento - 1); // 1s, 2s, 4s
+        console.log(`  ${etiqueta}: ${r.status} transitorio, reintento ${intento}/${maxIntentos - 1} en ${esperaMs}ms`);
+        await sleep(esperaMs);
+    }
+    throw ultimoError;
+}
+
 async function fetchAllPages(endpoint, token, dateStart) {
     const all = [];
     let page = 1;
@@ -38,18 +73,7 @@ async function fetchAllPages(endpoint, token, dateStart) {
     while (true) {
         const dateQ = dateStart ? `&date_start=${dateStart}` : '';
         const url = `https://api.siigo.com/v1/${endpoint}?page=${page}&page_size=${pageSize}${dateQ}`;
-        const r = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Partner-Id': 'Empresa',
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!r.ok) {
-            const txt = await r.text();
-            throw new Error(`Siigo ${endpoint} p${page} failed: ${r.status} ${txt.slice(0, 300)}`);
-        }
+        const r = await fetchPaginaConRetry(url, token, `Siigo ${endpoint} p${page}`);
 
         const data = await r.json();
         const results = data.results || [];
@@ -114,8 +138,17 @@ async function main() {
     console.log(JSON.stringify({ ok: true, generatedAt: snapshot.generatedAt, counts: snapshot.counts }, null, 2));
 }
 
-main().catch((err) => {
-    console.error('Snapshot refresh fallo:', err.message);
-    console.error(err.stack);
-    process.exit(1);
-});
+// Solo ejecuta el snapshot cuando el archivo se corre directamente (node scripts/refresh-snapshot.js).
+// Al importarse desde un test, no dispara main() para poder probar los helpers en aislamiento.
+const ejecutadoDirectamente =
+    process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]);
+
+if (ejecutadoDirectamente) {
+    main().catch((err) => {
+        console.error('Snapshot refresh fallo:', err.message);
+        console.error(err.stack);
+        process.exit(1);
+    });
+}
+
+export { fetchPaginaConRetry, fetchAllPages, autenticarSiigo, main };
