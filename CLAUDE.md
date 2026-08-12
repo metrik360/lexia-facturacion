@@ -132,25 +132,22 @@ El frontend detecta automaticamente el entorno (linea ~2083-2089):
 - **Progreso:** Mejoras de consistencia completadas, PDF corregido, demo marca blanca creada
 
 ## Ultimo avance
-**Sesion:** 2026-03-18
-**Branch:** main (11 commits)
+**Sesion:** 2026-04-15
+**Branch:** main
 
 Que se hizo:
-- Demo marca blanca (`demo.html`) mobile-first para reel Instagram con paleta MéTRIK, 3 pantallas (KPIs, Cartera, Historico), CTA WhatsApp, ruta /demo en Vercel
-- Columna CE (Comprobantes de Egreso) en tablas detalle de facturas (renderDetalleCliente y renderDetalleClienteTodos)
-- Fix cartera negativa: `facturaYaGestionadaEnSiigo()` verifica balance=0 O presencia de RC/CE en `pagosPorFactura`. Si Siigo ya gestiono, ignora Google Sheets MR
-- Filtro micro-saldos: facturas con saldo < $1,000 tratadas como pagadas (3 ubicaciones)
-- Filtros de estado en tablas detalle: pills (Todas/Pendientes/Con MR/Pagadas/Anuladas) con `renderFiltroEstadoBar()`
-- KPIs clickeables en Resumen: modal MR (`mostrarDetalleMR()`), modal Sin Identificar (`mostrarDetalleSinIdentificar()`), modal NITs no encontrados
-- PDF respeta mes de cierre: titulo incluye periodo, KPIs muestran rango, datos limitados a `mesAnalisisPDF`, filename incluye mes
-- Tabla detalle mensual del PDF: solo muestra meses hasta cierre (`MESES.slice(0, mesAnalisisPDF)`), page-break-before para hoja aparte
-- Graficas del PDF: barras del ano en curso solo hasta `mesAnalisisPDF`, meses posteriores vacios. Maximos calculados respetando corte
-- Unificacion total de calculos: TODO el sistema usa `f.total` (con IVA) en vez de `qty * price` (sin IVA). Afecta: calcularVentasMensuales, calcularVentasMensualesConciliacion, PDF (clientes, CC), Facturacion (clientes, CC), facturasProcessed.total, totalesFacturas/NC en conciliacion
-- Fechas invalidas corregidas en modal MR (`formatDate()` robusto), movimientos valor cero excluidos de todas las categorias
+- Fix datos historicos incompletos: Siigo API sin `date_start` devolvia datos inconsistentes (enero 0 facturas, febrero 16 en vez de 66). Se agrego `date_start` a todas las llamadas (invoices, credit-notes, vouchers)
+- Proxy `api/siigo.js` actualizado para pasar parametros extra (date_start, date_end, etc.) a Siigo API
+- Fix ventas infladas por IVA: revertido de `f.total` (con IVA) a `qty * price` (base gravable sin IVA) en todos los calculos de ventas. Helper `calcularValorBase(doc)` creado. CxC/cartera mantiene `f.total`
+- Paginacion robusta contra rate limiting de Siigo (deteccion de paginas vacias por throttle)
+- Analisis de conciliacion completo dashboard vs cierre contable 2022-2025:
+  - 2022: -3.03% | 2023: -1.67% | 2024: -3.12% | 2025: +0.45%
+  - Diferencia explicada por ajustes contables de cierre, notas debito y reclasificaciones
+  - Datos listos para presentar a directora financiera de Lexia
 
 ## Pendientes
-- [ ] Push commits al remoto (11 commits locales en main)
 - [ ] Migrar repo a bi-metrik (actualmente en metrik360)
+- [ ] Verificar por que Vercel no hace auto-deploy con push (deploy manual necesario)
 - [ ] Migrar www.metrik.com.co a metrik-one si se necesita
 
 ## Decisiones clave
@@ -164,14 +161,19 @@ Que se hizo:
 | 11/03/2026 | Dominios Vercel centralizados en team metrik-one | Cuenta personal queda limpia |
 | 11/03/2026 | metrik.com.co (sin www) sigue en GitHub Pages | No afectado por migracion |
 | 18/03/2026 | Siigo prioridad sobre Google Sheets para pagos | Si factura tiene RC o CE en Siigo, MR de Google Sheets se ignora completamente |
-| 18/03/2026 | f.total (con IVA) como unica fuente de valor | Elimina discrepancia ~19% entre calculos con/sin IVA en todo el sistema |
 | 18/03/2026 | Micro-saldos < $1,000 = pagados | Evita ruido de saldos residuales por redondeo o diferencias menores |
+| 15/04/2026 | qty*price (base gravable) para ventas, f.total solo para CxC | Base gravable coincide con contabilidad. f.total incluye IVA, correcto solo para cartera |
+| 15/04/2026 | date_start obligatorio en llamadas a Siigo API | Sin filtro de fecha, Siigo devuelve datos inconsistentes (facturas faltantes o con fechas modificadas) |
+| 15/04/2026 | Diferencia dashboard vs contabilidad (1-3%) es esperada | Ajustes de cierre, notas debito, reclasificaciones no capturables desde API de facturacion |
 
 ## Contexto critico
-- El repo en GitHub esta en `metrik360/lexia-facturacion`, no en `bi-metrik/`. Pendiente migrar.
+- El repo en GitHub esta en `metrik360/lexia-facturacion`, no en `bi-metrik/`. Pendiente migrar. Vercel no hace auto-deploy con push — requiere `vercel --prod --scope metrik-one` manual.
 - `anioAnalisis` y `anioAnalisisFacturacion` son variables independientes. Cambiar ano en Facturacion NO afecta el PDF (que usa `anioAnalisis` de Analisis por Ano).
 - Las tablas CxC y Cartera Real del PDF estan ocultas con `${false && ...}`, no eliminadas. Se pueden reactivar.
-- `facturasProcessed.total` ahora es `f.total` (con IVA). El campo `totalNeto` existe pero es redundante (mismo valor). `valorBase` (qty*price) ya no se usa en ningun calculo visible.
+- Calculos de ventas usan `calcularValorBase(doc)` = sum(qty*price) sin IVA. CxC/cartera usa `f.total` con IVA. Son dos logicas distintas a proposito.
+- `facturasProcessed.total` sigue siendo `f.total` (con IVA) — correcto para cartera.
+- Siigo API requiere `date_start` para devolver datos consistentes. Sin este parametro, facturas pueden desaparecer o tener fechas modificadas.
+- Conciliacion dashboard vs contabilidad: 2025 cuadra al 0.45% ($20.7M de $4,569M). Anos anteriores 1-3% de diferencia por ajustes contables.
 - Demo marca blanca en `/demo` usa misma API de Siigo sin auth. Datos reales pero nombres anonimizados en frontend.
 
 ## Notas para continuidad
